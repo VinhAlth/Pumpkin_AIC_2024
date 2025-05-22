@@ -1,0 +1,13 @@
+------conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
+
+conda install -c huggingface transformers
+pip install transformers
+
+conda install -c conda-forge flask
+
+conda install -c conda-forge faiss
+
+conda install -c conda-forge tqdm
+
+conda install -c conda-forge googletrans
+

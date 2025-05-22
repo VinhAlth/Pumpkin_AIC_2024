@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Search Page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            flex-direction: column;
+            background-color: #333;
+        }
+
+        .header {
+            background-color: #000;
+            text-align: center;
+            padding: 10px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .main-content input[type="text"] {
+            width: 100%;
+            max-width: 300px;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .main-content button,
+        audio {
+            padding: 10px 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #003b6d;
+            color: white;
+            cursor: pointer;
+            margin: 10px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .main-content {
+            display: flex;
+            flex: 1;
+            padding: 20px;
+            box-sizing: border-box;
+            flex-direction: column;
+            height: calc(100vh - 50px);
+            overflow: hidden;
+        }
+
+        #voiceBtn {
+            margin-left: 5px;
+            font-size: 24px;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.3s ease-in-out;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #003b6d;
+            color: white;
+        }
+
+        #voiceBtn.active {
+            transform: rotate(360deg);
+        }
+
+        .filters {
+            width: 100%;
+            max-width: 300px;
+            padding: 10px;
+            background-color: #111;
+            border-right: 1px solid #ddd;
+            box-sizing: border-box;
+            color: white;
+            max-height: 100vh;
+            overflow-y: auto;
+        }
+
+        .filters input[type="range"] {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        input[type="text"],
+        textarea {
+            padding: 10px 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            color: #000;
+            margin: 10px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #query-dropdown {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        #query-dropdown option {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .filters .translate-options,
+        .filters .model-options {
+            margin-top: 20px;
+        }
+
+        .videos {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(var(--thumbnail-width, 200px), 1fr));
+            grid-auto-rows: var(--thumbnail-height, 150px);
+            gap: 15px;
+            padding: 10px;
+            background-color: #111;
+            box-sizing: border-box;
+            overflow: auto;
+            color: white;
+        }
+
+        .thumbnail {
+            width: var(--thumbnail-width, 100%);
+            height: fit-content;
+            object-fit: cover;
+            position: relative;
+            background-color: #282424;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            padding: 1px;
+            display: flex;
+            flex-direction: column;
+            z-index: 1;
+        }
+
+        .thumbnail img {
+            width: 100%;
+            height: calc(var(--thumbnail-height, 150px) - 20px);
+            object-fit: cover;
+        }
+
+        .thumbnail:hover {
+            transform: scale(1.05);
+        }
+
+        .text-overlay-top,
+        .text-overlay-bottom {
+            position: absolute;
+            width: 100%;
+            padding: 5px;
+            text-align: center;
+            color: white;
+            font-size: 15px;
+            z-index: 1;
+            color: #003b6d;
+        }
+
+        .text-overlay-top {
+            top: 0;
+        }
+
+        .text-overlay-bottom {
+            left: 0;
+            text-align: left;
+        }
+
+        .selectedOutput {
+            position: absolute;
+            top: 20%;
+            right: 35%;
+            width: 35%;
+            height: 35%;
+            opacity: 0.5;
+            cursor: pointer;
+        }
+
+        .half {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 50%;
+            background-color: transparent;
+        }
+
+        .previous {
+            left: 0;
+        }
+
+        .after {
+            right: 0;
+        }
+
+        .sliding-panel {
+            position: fixed;
+            right: -350px;
+            width: 300px;
+            height: auto;
+            line-height: 46px;
+            font-size: 14px;
+            background: #222;
+            text-align: left;
+            color: #fff;
+            transform: translateY(0);
+            box-shadow: -4px 0px 5px #00000036;
+            z-index: 9999;
+            padding: 20px 30px 30px 30px;
+            transition: all 0.4s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sliding-panel.active {
+            right: 0;
+        }
+
+        .sliding-panel .submission {
+            position: absolute;
+            left: -80px;
+            width: 80px;
+            height: 45px;
+            line-height: 45px;
+            font-size: 14px;
+            border-radius: 5px 0 0 5px;
+            background: #003b6d;
+            text-align: center;
+            color: #fff;
+            top: 0;
+            cursor: pointer;
+            box-shadow: -4px 0px 5px #00000036;
+            display: inline-block;
+        }
+
+        .description {
+            font-size: 9pt;
+            background-color: black;
+            color: rgb(255, 255, 255);
+            font-weight: normal;
+            text-align: left;
+            margin: 0;
+            word-wrap: break-word;
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease, bottom 0.3s ease;
+            cursor: pointer;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            display: -webkit-inline-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+        .description.expanded {
+            -webkit-line-clamp: unset;
+            overflow-y: auto;
+            top: 0;
+        }
+
+        .keycap {
+            display: inline-block;
+            padding: 0.2em 0.5em;
+            margin: 0 0.1em;
+            border: 2px solid #40E0D0;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            font-weight: bold;
+            font-family: monospace;
+            color: #333;
+        }
+
+        #team {
+            font-family: 'Creepster', cursive;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #FF4500;
+            text-shadow:
+                0 0 5px rgba(0, 0, 0, 0.7),
+                0 0 10px rgba(0, 0, 0, 0.7),
+                0 0 15px rgba(255, 69, 0, 0.7);
+            background: linear-gradient(135deg, #FF4500, #FF6347);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: flicker 3s infinite;
+            cursor: pointer;
+        }
+
+
+        @media (min-width: 768px) {
+            .main-content {
+                flex-direction: row;
+            }
+
+            .filters {
+                width: 20%;
+            }
+
+            .videos {
+                width: 80%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+    </div>
+
+    <form id="form" method="POST" class="main-content">
+        <div class="filters">
+            <div style="display: flex; align-items: center;">
+                <textarea name="query" id="query" placeholder="Search for videos..." style="width: 300px; height: 90px;"
+                    autofocus></textarea>
+
+                <button id="voiceBtn"><i class="fas fa-microphone"></i></button>
+            </div>
+            <div>
+
+                <h3>Previous Query: <a href="#" id="previous-query" style="text-decoration: none;"></a></h3>
+
+                <h3>Query History: <select id="query-dropdown" style="width: 100%;"></select></h3>
+
+            </div>
+            <button id="search-button" style="background-color: #40E0D0;">Search</button>
+
+            <fieldset class="model-options">
+                <legend>Models</legend>
+                <label>
+                    <input type="radio" name="model" value="CLIP_LAION" id="" checked>
+                    CLIP_LAION
+                </label>
+                <label>
+                    <input type="radio" name="model" value="BLIP2" id="">
+                    BLIP2
+                </label>
+                <!-- <label>
+                    <input type="radio" name="model" value="" id="">
+                    Model 3
+                </label> -->
+            </fieldset>
+
+            <fieldset class="model-options">
+                <legend>Re-rank</legend>
+                <label>
+                    <input type="radio" name="rerank" value="OFF" id="" checked>
+                    Off
+                </label>
+                <label>
+                    <input type="radio" name="rerank" value="STEP" id="">
+                    Color Sort
+                </label>
+                <label>
+                    <input type="radio" name="rerank" value="MODEL" id="">
+                    Model Sort
+                </label>
+                <label>
+                    <input type="radio" name="rerank" value="IMAGEDEDUP" id="">
+                    Imagededup Sort
+                </label>
+                <label>
+                    <input type="radio" name="rerank" value="SHOT" id="">
+                    Shot Sort
+                </label>
+            </fieldset>
+
+            <!-- Hidden elements -->
+            <input onkeyup='saveValue(this);' style="display: none;" name="fname" id="fname" type="text"
+                placeholder="Paste image URL..."></input>
+
+            <fieldset class="translate-options" style="display: none;">
+                <legend>Languages</legend>
+                <label>
+                    <input type="radio" name="language" value="vi-VN">
+                    Vietnamese
+                </label>
+                <label>
+                    <input type="radio" name="language" value="en-US" checked>
+                    English
+                </label>
+            </fieldset>
+
+            <br />
+
+            <h3>Thumbnail Size</h3>
+            <input type="range" id="size-slider" min="100" max="400" value="200" oninput="adjustThumbnailSize()"
+                onchange="size_update(this)">
+
+            <h2>Instruction</h2>
+            <p>Press <span class="keycap">Enter</span> to search</p>
+            <p><span class="keycap">Ctrl</span> + <i class="fas fa-arrow-left"
+                    style="font-size: 1.2em; color: #40E0D0;"></i>/<i class="fas fa-arrow-right"
+                    style="font-size: 1.2em; color: #40E0D0;"></i>: Switch Model</p>
+            <p><span class="keycap">Shift</span> + <i class="fas fa-arrow-left"
+                    style="font-size: 1.2em; color: #40E0D0;"></i>/<i class="fas fa-arrow-right"
+                    style="font-size: 1.2em; color: #40E0D0;"></i>: Switch Rerank</p>
+            <p><span class="keycap">Shift</span> + <span class="keycap">Enter</span>: Reset</p>
+
+            <h2>Explanation</h2>
+            <br>
+            <br>
+            <br>
+
+            <div class="logo" style="display: inline-flex; cursor: pointer;">
+                <img style="height: 2rem; width: auto; margin: 5px;"
+                    src="https://cdn.pixabay.com/photo/2012/04/01/16/39/halloween-23439_960_720.png">
+                <label id="team">SIU_Pumpkin</label>
+            </div>
+
+            <div>
+                <div class="sliding-panel advanced" style="top: 5%;">
+                    <a class="submission" href="#">Advanced</a>
+                    <input id="video_name" type="text" placeholder="Video name for filtering...." id="video_filter"
+                        name="video_filter">
+                    <input id="timeIn_video_name" type="text" placeholder="Time in..." id="time_in" name="time_in">
+                    <input id="timeOut_video_name" type="text" placeholder="Time out..." id="time_out" name="time_out">
+                    <input type="range" min="1" max="1000" value="300" name="slider_k" id="slider_k"
+                        onchange="slider_update(this)">
+                    <input class="textbox" value="180" type="text" name="k" id="k">
+                    <button type="reset" id="reset" onclick="resetSlider();"> Reset </button>
+                    <button id="clearCacheButton" style="background-color: #880808;">Clear Cache</button>
+                </div>
+                <div class="sliding-panel submission" style="top: 0;" id="submission">
+                    <a class="submission" href="#">Submission</a>
+                    <ul>
+                        <li>
+                            <label>
+                                API Key:
+                                <input type="text" placeholder="API key..." name="selectedKey" id="selectedKey">
+                            </label>
+                        </li>
+                        <li>
+                            <label>
+                                Video:
+                                <input type="text" placeholder="Video..." name="selectedVideo" id="selectedVideo">
+                            </label>
+                        </li>
+                        <li>
+                            <label>
+                                Frame:
+                                <input type="text" placeholder="Frame..." name="selectedFrame" id="selectedFrame">
+                            </label>
+                        </li>
+                        <li>
+                            <label>
+                                Result:
+                                <input type="text" placeholder="Result..." name="submitResult" id="submitResult">
+                            </label>
+                        </li>
+                        <button id="submit">Submit</button>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="videos" id="videos">
+            {% for index, f, f_name, id, video, s2t in files %}
+            <div class="thumbnail">
+                <div style="position: relative;">
+                    <div class="half previous" id="previous-{{index}}"></div>
+                    <div class="half after" id="after-{{index}}"></div>
+                    <a class="video_id text-overlay-top"
+                        href="/aic/1/{{ url_for('video', filename=video, keyframe=f) }}" target="{{index}}">
+                        {{id}}
+                    </a>
+                    <input class="selectedOutput text-overlay-top" type="checkbox"
+                        style="position: absolute; left:50%; top:50%; width: 35%; height: 35%; opacity: 20%; transform: translate(-50%, -50%);"
+                        onclick="selectedOutput(this)">
+                    <img src="/aic/1/{{ url_for('download_file', filename=f) }}" id="{{index}}" loading="lazy">
+                    <a class="image_id text-overlay-bottom" style="left: 0; bottom: 10px;"
+                        href="/aic/1/{{ url_for('keyframes', keyframe=f) }}" id="f_name" target="{{index}}">
+                        {{f_name}}
+                    </a>
+                    <button class="text-overlay-bottom" style="width: 4rem; position: absolute; left: 90%; top: 50%;"
+                        id="search_image" data-imageid="{{index}}"></button>
+                    <button class="text-overlay-bottom"
+                        style="width: 4rem; position: absolute; left: 90%; top: 70%; background-color: green;"
+                        id="sort_image" data-imageid="{{index}}"></button>
+                </div>
+                <!-- Center div hover to display full s2t -->
+                <div style="align-items: center; display: flex; justify-content: center;">
+                    <div style="position: absolute; bottom: 0; width: 40px; height: 2rem; z-index: 100; justify-self: center;"
+                        id="description_hover"></div>
+                    <p class="description" id="description">{{s2t}}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+    </form>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+
+        document.getElementById('search-button').addEventListener('click', function () {
+            // set focus for the search bar
+            document.getElementById('query').focus();
+        });
+
+        function updateDropdown(queries) {
+            var dropdown = document.getElementById('query-dropdown');
+            dropdown.innerHTML = "";
+            queries.forEach(function (query) {
+                var option = document.createElement('option');
+                option.value = query;
+                option.textContent = query;
+                dropdown.appendChild(option);
+            });
+        }
+
+        function truncateOptions() {
+            const select = document.getElementById('query-dropdown');
+            const maxLength = 40;  // Total max length of visible characters
+            const headLength = 10;  // Characters to show at the beginning
+            const tailLength = 20;  // Characters to show at the end
+
+            for (let i = 0; i < select.options.length; i++) {
+                let option = select.options[i];
+                let text = option.text;
+
+                // Only truncate if the text is longer than the maximum allowed length
+                if (text.length > maxLength) {
+                    let truncatedText = text.slice(0, headLength) + '...' + text.slice(-tailLength);
+                    option.text = truncatedText;
+                }
+            }
+        }
+
+        document.getElementById('previous-query').addEventLisdtener('click', function (e) {
+            e.preventDefault();
+            var lastQuery = document.getElementById('previous-query').textContent;
+            document.getElementById('query').value = lastQuery;
+        });
+
+        document.getElementById('query-dropdown').addEventListener('change', function () {
+            var selectedQuery = this.value;
+            document.getElementById('query').value = selectedQuery;
+        });
+
+        window.onload = function () {
+            const savedValue = getSavedValue("size-slider");
+            if (savedValue) {
+                document.getElementById("size-slider").value = savedValue;
+                adjustThumbnailSize();
+            }
+            loadRadioValue('model');
+            loadRadioValue('rerank');
+
+            var query = "{{query}}";
+            var queries = sessionStorage.getItem('queries');
+
+            // If there's no existing list, initialize an empty array
+            if (!queries) {
+                queries = [];
+            } else {
+                // Parse the existing list into an array
+                queries = JSON.parse(queries);
+            }
+
+            // Add the new query to the list if it's not empty
+            if (query.trim() !== "") {
+                queries.unshift(query);
+
+                // Save the updated list back to session storage
+                sessionStorage.setItem('queries', JSON.stringify(queries));
+
+            }
+
+            document.getElementById('previous-query').textContent = query;
+
+            updateDropdown(queries);
+            truncateOptions();
+
+        };
+
+        function saveRadioValue(radioGroupName) {
+            const selectedRadio = document.querySelector(`input[name="${radioGroupName}"]:checked`);
+            if (selectedRadio) {
+                localStorage.setItem(radioGroupName, selectedRadio.value);
+            }
+        }
+
+        function loadRadioValue(radioGroupName) {
+            const savedValue = localStorage.getItem(radioGroupName);
+            if (savedValue) {
+                const radioButton = document.querySelector(`input[name="${radioGroupName}"][value="${savedValue}"]`);
+                if (radioButton) {
+                    radioButton.checked = true;
+                }
+            }
+        }
+
+        document.querySelectorAll('input[type="radio"]').forEach((radio) => {
+            radio.addEventListener('change', function () {
+                saveRadioValue(this.name);
+            });
+        });
+
+
+
+        function adjustThumbnailSize() {
+            const slider = document.getElementById('size-slider');
+            const width = slider.value;
+            const height = (width * 9) / 16;
+
+            document.documentElement.style.setProperty('--thumbnail-width', `${width}px`);
+            document.documentElement.style.setProperty('--thumbnail-height', `${height}px`);
+
+            // Adjust thumbnails width and height
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            thumbnails.forEach(thumbnail => {
+                thumbnail.style.width = `${width}px`;
+                thumbnail.style.height = 'auto';
+            });
+        }
+
+        function resetSlider() {
+            const slider = document.getElementById('size-slider');
+            slider.value = 200; // Reset to initial value
+            adjustThumbnailSize(); // Adjust thumbnail size accordingly
+        }
+
+        //Handle image list
+        var imageList = []
+        var str_imageList = "{{ list_frames|e }}";
+        str_imageList = str_imageList.split(']', Number("{{k}}"));
+        console.log(str_imageList)
+        for (var i = 0; i < str_imageList.length; i++) {
+            var current_imageList = str_imageList[i].replace(new RegExp("&#34;", 'g'), "");
+            current_imageList = current_imageList.replace(new RegExp(" ", 'g'), "");
+            current_imageList = current_imageList.replace(new RegExp("\\[", 'g'), "");
+            var l_f = current_imageList.split(',', 100)
+
+            if (i != 0) {
+                l_f = l_f.slice(1, l_f.length);
+            }
+            imageList.push(l_f)
+        }
+
+        var targetIndices = Array.from(document.querySelectorAll('.thumbnail img')).map(img => parseInt(img.id, 10));
+        console.log(targetIndices);
+
+        //Handle thumbnails
+        document.querySelectorAll('.thumbnail').forEach(function (element, index_fram) {
+            var interval;
+            var framesPerSecond = 2; // frames per second
+            var currentIndex = 20; // starting index
+            var image = element.querySelector("img");
+            var source = image.src;
+            var previous = element.querySelector(".previous");
+            var after = element.querySelector(".after");
+
+            var currentImageIndex = targetIndices[index_fram];
+            var current_imageList = imageList[currentImageIndex]; // get the current image list
+
+            // test
+            // console.log('Previous:', previous);
+            // console.log('After:', after);
+            // console.log('Image List:', current_imageList);
+
+            //Slide show
+            var playForward = function () {
+                clearInterval(interval);
+                interval = setInterval(function () {
+                    if (currentIndex < current_imageList.length - 1) {
+                        currentIndex++;
+                        image.src = "/aic/1/{{ url_for('download_file', filename='') }}" + current_imageList[currentIndex];
+                    } else {
+                        clearInterval(interval); // stop the interval
+                    }
+                }, 1000 / framesPerSecond);
+            };
+
+            var playBackward = function () {
+                clearInterval(interval);
+                interval = setInterval(function () {
+                    if (currentIndex > 0) {
+                        currentIndex--;
+                        image.src = "/aic/1/{{ url_for('download_file', filename='') }}" + current_imageList[currentIndex];
+                    } else {
+                        clearInterval(interval);
+                    }
+                }, 1000 / framesPerSecond);
+            };
+
+            after.addEventListener('mouseenter', playForward);
+            previous.addEventListener('mouseenter', playBackward);
+
+            after.addEventListener('mouseleave', function () {
+                clearInterval(interval);
+            });
+
+            previous.addEventListener('mouseleave', function () {
+                clearInterval(interval);
+            });
+
+            element.addEventListener('mouseleave', function () {
+                currentIndex = 20; // reset to the initial
+                image.src = source;
+            });
+
+            //show full s2t
+            var hover = element.querySelector("#description_hover");
+            var text = element.querySelector("#description");
+            hover.addEventListener('mouseenter', function () {
+                text.classList.add('expanded');
+            });
+
+            hover.addEventListener('mouseleave', function () {
+                text.classList.remove('expanded');
+            });
+
+            //Getting video id and image id when clicking on the button
+            var checkbox = element.querySelector("input");
+            checkbox.addEventListener('click', function () {
+                var setVideo = document.getElementById("selectedVideo");
+                var input = element.querySelector(".video_id").innerHTML.trim();
+                // console.log(input);
+
+                var [videoID, time] = input.split(", ");
+                setVideo.value = videoID.replace(".mp4", "");
+
+                // console.log(videoID);
+                // console.log(time);
+
+                var setFrame = document.getElementById("selectedFrame");
+                var imageID = element.querySelector(".image_id").innerHTML.trim();
+                imageID = imageID.replace('.jpg', "");
+                setFrame.value = imageID;
+                // submit_f();
+            });
+
+            //Get image url
+            var search_image_button = element.querySelector("#search_image");
+            search_image_button.addEventListener("click", function () {
+                var query_input = document.getElementById("query");
+                query_input.value = "{{ url_for('download_file', filename='') }}" + current_imageList[20];
+                document.getElementById("search-button").click();
+            })
+
+            var sort_image_button = element.querySelector("#sort_image");
+            sort_image_button.addEventListener("click", function () {
+                var query_input = document.getElementById("query");
+                query_input.value = "shot-" + "{{ url_for('download_file', filename='') }}" + current_imageList[20];
+                document.getElementById("search-button").click();
+            })
+
+        });
+
+        //Get the input field
+        // document.getElementById("query").value = getSavedValue("query");    // set the value to this input
+        // document.getElementById("fname").value = getSavedValue("fname");   // set the value to this input
+        document.getElementById("size-slider").value = getSavedValue("size-slider");
+
+        function size_update(e) {
+            adjustThumbnailSize();
+            saveValue(e);
+        }
+
+        var k_value = document.getElementById('k');
+        var slider = document.getElementById('slider_k');
+
+        k_value.innerHTML = slider.value;
+        slider.oninput = function () {
+            k_value.innerHTML = this.value;
+        }
+
+        /* Here you can add more inputs to set value. if it's saved */
+        function slider_update(e) {
+            document.getElementById('k').value = e.value;
+        }
+
+        //Save the value function - save it to localStorage as (ID, VALUE)
+        function saveValue(e) {
+            var id = e.id;  // get the sender's id to save it . 
+            var val = e.value; // get the value. 
+            localStorage.setItem(id, val);// Every time user writing something, the localStorage's value will override . 
+        }
+
+        //get the saved value function - return the value of "v" from localStorage. 
+        function getSavedValue(v) {
+            if (!localStorage.getItem(v)) {
+                return "";// You can change this to your defualt value. 
+            }
+            return localStorage.getItem(v);
+        }
+
+        //reset model options and rerank options
+        document.getElementById('reset').addEventListener('click', function () {
+            localStorage.clear();
+        });
+
+        document.getElementById("clearCacheButton").addEventListener("click", function () {
+            localStorage.clear();
+            sessionStorage.clear();
+
+            // Clear cache using Service Worker
+            if ('caches' in window) {
+                caches.keys().then(function (keyList) {
+                    return Promise.all(keyList.map(function (key) {
+                        return caches.delete(key);
+                    }));
+                });
+            }
+
+            // Clear cookies
+            document.cookie.split(";").forEach(function (c) {
+                document.cookie = c.trim().split("=")[0] + "=;expires=" + new Date(0).toUTCString() + ";path=/";
+            });
+
+            window.location.reload(true);
+        });
+
+        //get voice btn
+        document.addEventListener("DOMContentLoaded", () => {
+            const voiceBtn = document.getElementById('voiceBtn');
+            const result = document.getElementById('query');
+            const recordedAudio = document.getElementById('recordedAudio');
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+
+            let isRecording = false;
+            let mediaRecorder;
+            let audioChunks = [];
+
+            recognition.onstart = () => {
+                // console.log('Voice recognition started. Try speaking into the microphone.');
+                voiceBtn.classList.add('active');
+            };
+
+            recognition.onspeechend = () => {
+                // console.log('Voice recognition ended.');
+                recognition.stop();
+                voiceBtn.classList.remove('active');
+                if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                    mediaRecorder.stop();
+                }
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                result.value = transcript;
+            };
+
+            voiceBtn.addEventListener('click', async () => {
+
+                event.preventDefault();
+
+                if (isRecording) {
+                    recognition.stop();
+                    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                        mediaRecorder.stop();
+                    }
+                    isRecording = false;
+                    return;
+                }
+
+                const selectedLanguage = document.querySelector('input[name="language"]:checked')?.value || 'en-US';
+                recognition.lang = selectedLanguage;
+                recognition.start();
+
+                // record audio
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+
+                //To handle audio records
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' }); // audio file
+                    const audioUrl = URL.createObjectURL(audioBlob); // URL of the audio
+                    recordedAudio.src = audioUrl;
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+            });
+        });
+
+        //active submission section
+        $(document).ready(function () {
+            $('.sliding-panel').on("mouseenter", function () {
+                $(this).addClass('active');
+            }).on("mouseleave", function () {
+                $(this).removeClass('active');
+            });
+        });
+
+
+        function selectedOutput(clickedCheckbox) {
+            var checkboxes = document.querySelectorAll(".selectedOutput");
+            checkboxes.forEach(function (checkbox) {
+                if (checkbox !== clickedCheckbox) {
+                    checkbox.checked = false;
+                }
+            });
+            var panel = $('#submission');
+            if (clickedCheckbox.checked) {
+                panel.addClass('active');  // expand the panel if checkbox is checked
+            } else {
+                panel.removeClass('active');  // close the panel if the checkbox is unchecked
+            }
+        }
+
+        document.querySelector(".logo").addEventListener('click', function () {
+            document.getElementById("query").value = "hello random pumpkin";
+            document.getElementById("search-button").click();
+        });
+
+        document.getElementById('query').addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent default submission
+                document.getElementById('search-button').click(); // Trigger
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            // Ctrl + Left / Right Arrow: Switch Model
+            if (event.ctrlKey && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+                switchModel(event.key === 'ArrowRight');
+                event.preventDefault();
+            }
+
+            // Shift + Left / Right Arrow: Switch Rerank
+            if (event.shiftKey && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+                switchRerank(event.key === 'ArrowRight');
+                event.preventDefault();
+            }
+
+            // Shift + Enter: Reset the form
+            if (event.shiftKey && event.key === 'Enter') {
+                document.getElementById("reset").click();
+                event.preventDefault();
+            }
+        });
+
+        function switchModel(isNext) {
+            const models = document.querySelectorAll('input[name="model"]');
+            let selectedIndex = Array.from(models).findIndex(radio => radio.checked);
+            if (isNext) {
+                selectedIndex = (selectedIndex + 1) % models.length;
+            } else {
+                selectedIndex = (selectedIndex - 1 + models.length) % models.length;
+            }
+            models[selectedIndex].checked = true;
+            saveRadioValue('model');
+        }
+
+        function switchRerank(isNext) {
+            const reranks = document.querySelectorAll('input[name="rerank"]');
+            let selectedIndex = Array.from(reranks).findIndex(radio => radio.checked);
+            if (isNext) {
+                selectedIndex = (selectedIndex + 1) % reranks.length;
+            } else {
+                selectedIndex = (selectedIndex - 1 + reranks.length) % reranks.length;
+            }
+            reranks[selectedIndex].checked = true;
+            saveRadioValue('rerank');
+        }
+    </script>
+</body>
+
+</html>

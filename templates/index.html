@@ -1,0 +1,1849 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Search Page</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            flex-direction: column;
+            background-color: #333;
+        }
+
+        .header {
+            background-color: #000;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .main-content input[type="text"] {
+            width: 100%;
+            max-width: 300px;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .main-content button,
+        audio,
+        #choosingFrameBtn {
+            padding: 10px 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #003b6d;
+            color: white;
+            cursor: pointer;
+            margin: 10px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .main-content {
+            display: flex;
+            flex: 1;
+            padding: 20px;
+            box-sizing: border-box;
+            flex-direction: column;
+            height: calc(100vh - 50px);
+            overflow: hidden;
+        }
+
+        #voiceBtn {
+            margin-left: 5px;
+            font-size: 24px;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.3s ease-in-out;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #003b6d;
+            color: white;
+        }
+
+        #voiceBtn.active {
+            transform: rotate(360deg);
+        }
+
+        .filters {
+            width: 100%;
+            max-width: 300px;
+            padding: 10px;
+            background-color: #111;
+            border-right: 1px solid #ddd;
+            box-sizing: border-box;
+            color: white;
+            max-height: 100vh;
+            overflow-y: auto;
+        }
+
+        .filters input[type="range"] {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        input[type="text"],
+        textarea {
+            padding: 10px 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            color: #000;
+            margin: 10px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #query-dropdown {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        #query-dropdown option {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .filters .translate-options,
+        .filters .model-options {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .videos {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(var(--thumbnail-width, 200px), 1fr));
+            grid-auto-rows: var(--thumbnail-height, 150px);
+            grid-column-gap: 5px;
+            grid-row-gap: 0;
+            padding: 10px;
+            background-color: #111;
+            box-sizing: border-box;
+            overflow: auto;
+            color: white;
+        }
+
+        .thumbnail {
+            width: var(--thumbnail-width, 100%);
+            height: fit-content;
+            object-fit: cover;
+            position: relative;
+            background-color: #282424;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            padding: 1px;
+            display: flex;
+            flex-direction: column;
+            z-index: 1;
+        }
+
+        .thumbnail img {
+            width: 100%;
+            height: calc(var(--thumbnail-height, 150px) - 20px);
+            object-fit: cover;
+        }
+
+        .thumbnail:hover {
+            transform: scale(1.05);
+        }
+
+        .text-overlay-top,
+        .text-overlay-bottom {
+            position: absolute;
+            width: 100%;
+            padding: 5px;
+            text-align: center;
+            color: white;
+            font-size: 15px;
+            z-index: 1;
+            color: #003b6d;
+        }
+
+        .text-overlay-top {
+            top: 0;
+        }
+
+        .text-overlay-bottom {
+            left: 0;
+            text-align: left;
+        }
+
+        .selectedOutput {
+            position: absolute;
+            top: 20%;
+            right: 35%;
+            width: 35%;
+            height: 35%;
+            opacity: 0.5;
+            cursor: pointer;
+        }
+
+        .half {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 50%;
+            background-color: transparent;
+        }
+
+        .previous {
+            left: 0;
+        }
+
+        .after {
+            right: 0;
+        }
+
+        .sliding-panel {
+            position: fixed;
+            right: -350px;
+            width: 300px;
+            height: auto;
+            line-height: 46px;
+            font-size: 14px;
+            background: #222;
+            text-align: left;
+            color: #fff;
+            transform: translateY(0);
+            box-shadow: -4px 0px 5px #00000036;
+            z-index: 9999;
+            padding: 20px 30px 30px 30px;
+            transition: all 0.4s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sliding-panel.active {
+            right: 0;
+        }
+
+        .sliding-panel .submission {
+            position: absolute;
+            left: -80px;
+            width: 80px;
+            height: 45px;
+            line-height: 45px;
+            font-size: 14px;
+            border-radius: 5px 0 0 5px;
+            background: #003b6d;
+            text-align: center;
+            color: #fff;
+            top: 0;
+            cursor: pointer;
+            box-shadow: -4px 0px 5px #00000036;
+            display: inline-block;
+        }
+
+        .description {
+            font-size: 9pt;
+            background-color: black;
+            color: rgb(255, 255, 255);
+            font-weight: normal;
+            text-align: left;
+            margin: 0;
+            word-wrap: break-word;
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease, bottom 0.3s ease;
+            cursor: pointer;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            display: -webkit-inline-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+        .description.expanded {
+            -webkit-line-clamp: unset;
+            overflow-y: auto;
+            top: 0;
+        }
+
+        .keycap {
+            display: inline-block;
+            padding: 0.2em 0.5em;
+            margin: 0 0.1em;
+            border: 2px solid #40E0D0;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            font-weight: bold;
+            font-family: monospace;
+            color: #333;
+        }
+
+        #team {
+            font-family: 'Creepster', cursive;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #FF4500;
+            text-shadow:
+                0 0 5px rgba(0, 0, 0, 0.7),
+                0 0 10px rgba(0, 0, 0, 0.7),
+                0 0 15px rgba(255, 69, 0, 0.7);
+            background: linear-gradient(135deg, #FF4500, #FF6347);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: flicker 3s infinite;
+            cursor: pointer;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+
+        .modal-content {
+            margin: auto;
+            padding: auto;
+            background-color: #000;
+            width: 60%;
+            position: relative;
+            transform: translate(0, 10%);
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .csv-container {
+            display: flex;
+            align-items: center;
+        }
+
+        #fileName {
+            margin-right: 10px;
+            width: 125px;
+        }
+
+        #downloadCsvButton {
+            width: 50%;
+        }
+
+        .input-container {
+            display: flex;
+            width: 100%;
+        }
+
+        #video_filter {
+            flex: 2;
+            margin-right: 10px;
+        }
+
+        #time_in {
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        #time_out {
+            flex: 1;
+            margin-right: 0;
+        }
+
+
+        .rerank-btn {
+            flex: 1 1 calc(50% - 10px);
+            /* Adjust width to fit two per row */
+            max-width: calc(50% - 10px);
+            /* Ensure buttons do not exceed container width */
+            box-sizing: border-box;
+            padding: 10px;
+            font-size: 14px;
+            transition: background-color 0.3s ease, color 0.3s ease, border 0.3s ease;
+        }
+
+        .rerank-btn.active,
+        .submission-btn.active {
+            background-color: #40E0D0;
+            color: white;
+            border: 2px solid #40E0D0;
+        }
+
+        .video_id,
+        .image_id {
+            background-color: rgba(255, 255, 143, 0.5);
+            /* Light yellow background */
+            padding: 5px;
+            border-radius: 5px;
+            /* Adjust width to fit content */
+            width: auto;
+            /* Ensure width adjusts to content */
+            white-space: nowrap;
+            /* Prevent text from wrapping */
+        }
+
+        .char-count {
+            font-size: 14px;
+            color: #fff;
+        }
+
+        .char-count.warning {
+            color: red;
+        }
+
+
+
+        @media (min-width: 768px) {
+            .main-content {
+                flex-direction: row;
+            }
+
+            .filters {
+                width: 20%;
+            }
+
+            .videos {
+                width: 80%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <form id="form" method="POST">
+
+        <div class="header" style="display: flex; justify-content: center; align-items: center;">
+            <!-- Local broadcast -->
+            <!-- <form id="messageForm" style="display: flex; align-items: center; ">
+            <input type="text" id="messageInput" placeholder="Frame..." style="width: 40%; ">
+            <button type="submit">Send</button>
+            <div id="messages"></div>
+        </form> -->
+
+            <div style="display: flex; gap: 20px; align-items: center; color: white;">
+                <div style="display: flex; column-gap: 10px; align-items: center;">
+                    <p>Batch:</p>
+                    <label for="batch_0" style="font-size: medium;">General</label>
+                    <input type="checkbox" id="batch_0" name="batch" value="0" checked>
+                    <label for="batch_1" style="font-size: medium;">Bike</label>
+                    <input type="checkbox" id="batch_1" name="batch" value="1">
+                    <label for="batch_2" style="font-size: medium;">Unicorn</label>
+                    <input type="checkbox" id="batch_2" name="batch" value="2">
+                    <label for="batch_3" style="font-size: medium;">Study</label>
+                    <input type="checkbox" id="batch_3" name="batch" value="3">
+                    <label for="batch_4" style="font-size: medium;">Cooking</label>
+                    <input type="checkbox" id="batch_4" name="batch" value="4">
+                    <label for="batch_5" style="font-size: medium;">Tourism</label>    
+                    <input type="checkbox" id="batch_5" name="batch" value="5">                                                        
+                </div>
+                <input name="query_s2t" id='query_s2t' style="width: 100px;" placeholder='Search s2t...'>
+                <div style="display: flex; column-gap: 10px; align-items: center;">
+                    <p>S2t:</p>
+                    <label>
+                        <input type="radio" name="s2t_switch" id="s2t_on" value="ON" checked>
+                        On
+                    </label>
+                    <label>
+                        <input type="radio" name="s2t_switch" id="s2t_off" value="OFF">
+                        Off
+                    </label>
+                </div>
+                <div style="display: flex; column-gap: 10px; align-items: center;"></div>
+                <p>Last Frame:</p>
+                <a href="#" id="last-frame" style="text-decoration: none;"></a>
+            </div>
+        </div>
+
+        </div>
+
+        <!-- Video pop up -->
+        <div id="videoModal" class="modal">
+            <div class="modal-content" id='modal-content' style="justify-content: center;">
+                <span class="close">&times;</span>
+                <video id="modalVideo" width="100%" controls loop="false" style="display: none;">
+                    <source id="videoSource" src="" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <canvas id="canvas" style="display:none;"></canvas>
+                <div class="timeline" id="image-timeline"></div>
+                <img id="modalImage" width="100%" style="display: none;" />
+                <button id="choosingFrameBtn" style="display: none; width: 3 rem;">Choose this frame</button>
+            </div>
+        </div>
+
+
+        <div class="main-content">
+            <div class="filters">
+                <div style="display: flex; align-items: center;">
+                    <textarea name="query" id="query" placeholder="Search for videos..."
+                        style="width: 300px; height: 90px;" autofocus></textarea>
+                    <button id="voiceBtn"><img style='width: 40px; height: 40px; border-radius: 50%; background-color: white;' src="{{ url_for('static', filename='icon/free-microphone-icon-342-thumb.png') }}"></button>
+                </div>
+                <div id="charCount" class="char-count" style="position: relative; text-align: right; width: 100%;">
+                </div>
+                <div>
+                    <h3>Previous Query: <a href="#" id="previous-query" style="text-decoration: none;"></a></h3>
+                    <h3>Query History: <select id="query-dropdown" style="width: 100%;"></select></h3>
+                </div>
+                <div class="input-container">
+                    <input id="video_filter" type="text" placeholder="Video name for filtering...." name="video_filter"
+                        oninput="this.value = this.value.toUpperCase();">
+                    <input id="time_in" type="text" placeholder="Start..." name="time_in">
+                    <input id="time_out" type="text" placeholder="End..." name="time_out">
+                </div>
+                <button id="search-button" style="background-color: #40E0D0;">Search</button>
+                <fieldset class="translate-options">
+                    <legend>Translate</legend>
+                    <label>
+                        <input type="radio" name="translate" value="NO">
+                        No
+                    </label>
+                    <label>
+                        <input type="radio" name="translate" value="YES" checked>
+                        Yes
+                    </label>
+                </fieldset>
+                <fieldset class="model-options">
+                    <legend>Models</legend>
+                    <label>
+                        <input type="radio" name="model" value="SIGLIP" id="" checked>
+                        SIGLIP
+                    </label>
+                    <label>
+                        <input type="radio" name="model" value="DFN5B" id="">
+                        DFN5B
+                    </label>
+                    <label>
+                        <input type="radio" name="model" value="TEMPORAL_SIGLIP" id="">
+                        TEMPORAL_SIGLIP
+                    </label>
+                    <label>
+                        <input type="radio" name="model" value="TEMPORAL_DFN5B" id="">
+                        TEMPORAL_DFN5B
+                    </label>
+                    <label>
+                        <input type="radio" name="model" value="BACKUP_SIGLIP" id="">
+                        BACKUP_SIGLIP
+                    </label>
+                    <label>
+                        <input type="radio" name="model" value="BACKUP_TEMPORAL_SIGLIP" id="">
+                        BACKUP_TEMPORAL_SIGLIP
+                    </label>
+                </fieldset>
+                <fieldset class="model-options" style="display: none;">
+                    <legend>Re-rank</legend>
+                    <label>
+                        <input type="radio" name="rerank" value="OFF" id="" checked>
+                        Off
+                    </label>
+                    <!-- <label>
+                        <input type="radio" name="rerank" value="STEP" id="">
+                        Color Sort
+                    </label>
+                    <label>
+                        <input type="radio" name="rerank" value="MODEL" id="">
+                        Model Sort
+                    </label>
+                    <label>
+                        <input type="radio" name="rerank" value="IMAGEDEDUP" id="">
+                        Imagededup Sort
+                    </label>
+                    <label>
+                        <input type="radio" name="rerank" value="SHOT" id="">
+                        Shot Sort
+                    </label> -->
+                </fieldset>
+                <fieldset class="model-options">
+                    <legend>Re-rank</legend>
+                    <!-- <button type="button" class="rerank-btn" data-value="OFF" id="rerank-off" class="active">Off</button> -->
+                    <button type="button" class="rerank-btn" data-value="STEP" id="rerank-color">Color Sort</button>
+                    <!-- <button type="button" class="rerank-btn" data-value="MODEL" id="rerank-model">Model Sort</button> -->
+                    <button type="button" class="rerank-btn" data-value="IMAGEDEDUP" id="rerank-imagededup">Imagededup
+                        Sort</button>
+                    <button type="button" class="rerank-btn" data-value="OFF" id="rerank-off">Off</button>
+                </fieldset>
+                <!-- <button id="shot_sort" type="button">Shot Sort</button> -->
+                <!-- Hidden elements -->
+                <input onkeyup='saveValue(this);' style="display: none;" name="fname" id="fname" type="text"
+                    placeholder="Paste image URL..."></input>
+                <h3>Result</h3>
+                <input type="range" min="10" max="1000" value="100" step="10" name="slider_k" id="slider_k">
+                <input class="textbox" value="100" type="text" name="k" id="k">
+                <h3>Thumbnail Size</h3>
+                <input type="range" id="size-slider" min="100" max="400" value="300" oninput="adjustThumbnailSize()"
+                    onchange="size_update(this)">
+                <h2>Instruction</h2>
+                <p>Press <span class="keycap">Enter</span> to search</p>
+                <p>Press <span class="keycap">Space</span> to play video</p>
+                <p>Press <span class="keycap">Esc</span> to escape pop up</p>
+                <p><span class="keycap">Ctrl</span> + <span class="keycap">~</span>: Switch Translate</p>
+                <p><span class="keycap">Ctrl</span> + <i class="fas fa-arrow-left"
+                        style="font-size: 1.2em; color: #40E0D0;"></i>/<i class="fas fa-arrow-right"
+                        style="font-size: 1.2em; color: #40E0D0;"></i>: Switch Model</p>
+                <p><span class="keycap">Shift</span> + <i class="fas fa-arrow-left"
+                        style="font-size: 1.2em; color: #40E0D0;"></i>/<i class="fas fa-arrow-right"
+                        style="font-size: 1.2em; color: #40E0D0;"></i>: Switch Rerank</p>
+                <p><span class="keycap">Shift</span> + <span class="keycap">Enter</span>: Reset</p>
+                <h2>Explanation</h2>
+                <br>
+                <br>
+                <br>
+                <div class="logo" style="display: inline-flex; cursor: pointer;">
+                    <img style="height: 2rem; width: auto; margin: 5px;"
+                    src="{{ url_for('static', filename='icon/halloween-23439_960_720.webp') }}">
+                    <label id="team">SIU_Pumpkin</label>
+                </div>
+                <div>
+                    <div class="sliding-panel submission" style="top: 0;" id="submission">
+                        <a class="submission" href="#">Submission</a>
+                        <ul>
+                            <li style='display: none;'>
+                                <label>
+                                    Fps:
+                                    <input type="text" placeholder="Video..." name="selectedFps" id="selectedFps">
+                                </label>
+                            </li>
+                            <li>
+                                <label>
+                                    Video:
+                                    <input type="text" placeholder="Video..." name="selectedVideo" id="selectedVideo">
+                                </label>
+                            </li>
+                            <li>
+                                <label>
+                                    Frame:
+                                    <input type="text" placeholder="Frame..." name="selectedFrame" id="selectedFrame">
+                                </label>
+                            </li>
+                            <li>
+                                <label>
+                                    QA:
+                                    <input type="text" placeholder="QA..." name="" id="qA">
+                                </label>
+                            </li>
+                            <li>
+                                <label>
+                                    Result:
+                                    <input type="text" placeholder="Result..." name="submitResult" id="submitResult">
+                                </label>
+                            </li>
+                            <div class="csv-container">
+                                <input type="text" placeholder="File name..." id="fileName">
+                                <!-- <input type="text" placeholder="QA..." id="qA"> -->
+                                <button id="downloadCsvButton">Download</button>
+                            </div>
+                            <button id="submit" type="button">Submit</button>
+                            <button class="submission-btn" id="register">Register Last Frame</button>
+                            <button type="reset" id="reset" onclick="resetSlider();"> Reset </button>
+                            <button id="clearCacheButton" style="background-color: #880808;">Clear Cache</button>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="videos" id="videos">
+                {% for index, f, f_name, id, video, s2t, frame_status, fps in files %}
+                <div class="thumbnail">
+                    <div style="position: relative;">
+                        <a id='fps' class='fps' style='display: none;'>{{fps}}</a>
+                        <div class="half previous" id="previous-{{index}}"></div>
+                        <div class="half after" id="after-{{index}}"></div>
+                        <a class="video_id text-overlay-top" href="{{ url_for('video', filename=video, keyframe=f) }}"
+                            data-imageid="{{id}}" target="{{index}}">
+                            {{id}}
+                        </a>
+                        <button class='text-overlay-bottom' id="duplicate_button" style="display: absolute; opacity: 50%; width: 2rem; height: 2rem; top: -15%; left: 90%; background-color: {{ 'red' if frame_status == 'RED' else 'green' }};"></button>
+                        <input class="selectedOutput text-overlay-top" type="checkbox"
+                            style="position: absolute; left:50%; top:50%; width: 35%; height: 35%; opacity: 20%; transform: translate(-50%, -50%);"
+                            onclick="selectedOutput(this)">
+                        <img data-src="" id="{{index}}" class="lazy-image" loading="lazy">
+                        <a class="image_id text-overlay-bottom" style="left: 0; bottom: 10px;"
+                            href="{{ url_for('keyframes', keyframe=f) }}" id="f_name" target="{{index}}">
+                            {{f_name}}
+                        </a>
+                        <button class="text-overlay-bottom"
+                            style="width: 4rem; position: absolute; left: 90%; top: 50%;" id="search_image"
+                            data-imageid="{{index}}"></button>
+                        <button class="text-overlay-bottom"
+                            style="width: 4rem; position: absolute; left: 90%; top: 70%; background-color: green;"
+                            id="sort_image" data-imageid="{{index}}"></button>
+                    </div>
+                    <!-- Center div hover to display full s2t -->
+                    <div style="align-items: center; display: flex; justify-content: center;">
+                        <div style="position: absolute; bottom: 0; width: 40px; height: 2rem; z-index: 100; justify-self: center;"
+                            class="description-hover"></div>
+                        <p class="description">{{s2t}}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </form>
+
+    <script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jszip.min.js') }}"></script>
+
+    <script>
+        
+        $(document).ready(function() {
+            $.ajax({
+                url: 'get_last_frame',
+                method: 'GET',
+                success: function(data) {
+                    $('#last-frame').text(`(${data.video_name}, ${data.frame_name})`);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error('Error:', textStatus, errorThrown);
+                }
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const textarea = document.getElementById("query");
+            const charCountDiv = document.getElementById("charCount");
+            const maxChars = 64;
+
+            function updateCharCount() {
+                const currentLength = textarea.value.length;
+
+                charCountDiv.textContent = `${currentLength}/${maxChars}`;
+
+                // Check if over the limit and update styles accordingly
+                if (currentLength > maxChars) {
+                    charCountDiv.classList.add("warning");
+                } else {
+                    charCountDiv.classList.remove("warning");
+                }
+            }
+
+            textarea.addEventListener("input", updateCharCount);
+
+            document.getElementById('previous-query').addEventListener('click', function (e) {
+                e.preventDefault();
+                var lastQuery = document.getElementById('previous-query').textContent;
+                document.getElementById('query').value = lastQuery;
+                updateCharCount();
+            });
+
+            document.getElementById('query-dropdown').addEventListener('change', function () {
+                var selectedQuery = this.value;
+                document.getElementById('query').value = selectedQuery;
+                updateCharCount();
+            });
+        });
+
+
+        const rerankButtons = document.querySelectorAll('.rerank-btn');
+
+        // Add click event listeners to each button
+        rerankButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                // Remove active class from all buttons
+                rerankButtons.forEach(btn => btn.classList.remove('active'));
+
+                // Add active class to the clicked button
+                this.classList.add('active');
+
+                // Optional: Do something with the button's data-value (e.g., apply re-ranking logic)
+                const rerankValue = this.getAttribute('data-value');
+                console.log('Selected re-rank option:', rerankValue);
+                // Add your re-rank logic here if necessary
+            });
+        });
+
+        $(document).ready(function () {
+            $('.rerank-btn').on('click', function () {
+                // Remove active class from all buttons
+                $('.rerank-btn').removeClass('active');
+
+                // Add active class to the clicked button
+                $(this).addClass('active');
+
+                // Get the selected method from the button's data-value attribute
+                var selectedMethod = $(this).data('value');
+                console.log('Selected Re-rank Method:', selectedMethod);
+
+                var shortened_files = "{{shortened_files}}";
+                shortened_files = shortened_files.replace(/&#39;/g, "'");
+
+                $.ajax({
+                    url: 'aic/1/get_rerank',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        method: selectedMethod,  // Use the selected re-rank method
+                        files: shortened_files
+                    }),
+                    success: function (response) {
+                        const rerankedFiles = response;  // Assuming response is an array of files with their new order
+
+                        // Extract the new index positions
+                        var indexPosition = rerankedFiles.map(item => item[0]); // Assuming the index is at item[0]
+
+                        // Get the container for the videos
+                        var videosContainer = document.getElementById("videos");
+
+                        // Create an array of reordered thumbnails
+                        var reorderedThumbnails = indexPosition.map(function (index) {
+                            return document.querySelector(`.thumbnail img[id="${index}"]`).parentElement.parentElement;
+                        });
+
+                        // Clear the existing thumbnails
+                        videosContainer.innerHTML = '';
+
+                        // Append the thumbnails in the new order
+                        reorderedThumbnails.forEach(function (thumbnail) {
+                            videosContainer.appendChild(thumbnail);
+                        });
+                    },
+                    error: function (err) {
+                        console.error('Error fetching reranked files:', err);
+                    }
+                });
+            });
+        });
+
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById('videoModal');
+            const content = document.getElementById('modal-content');
+            const modalVideo = document.getElementById('modalVideo');
+            const videoSource = document.getElementById('videoSource');
+            const modalImage = document.getElementById('modalImage');
+            const closeModal = document.querySelector('.close');
+            const chooseFrameBtn = document.getElementById('choosingFrameBtn');
+
+            // Event listener for each video link (for video display)
+            document.querySelectorAll('.video_id').forEach(videoLink => {
+                videoLink.addEventListener('click', function (event) {
+                    event.preventDefault(); // Prevent redirect
+
+                    // Hide image and show video elements
+                    modalImage.style.display = 'none';
+                    modalVideo.style.display = 'block';
+                    chooseFrameBtn.style.display = 'block';
+
+                    let Url = this.href; // Get the video URL from the link
+                    let [videoName, displayTime, fps] = this.getAttribute('data-imageid').split(', ');
+
+                    videoName = videoName.replace('.mp4', '');
+                    let framename = Url.split('/')[Url.split('/').length - 1];
+                    let frame_id = parseInt(framename.split('.')[0]);
+                    let time = (frame_id / fps);
+
+                    let videoUrl = Url.split('//dataset')[0];
+                    let true_videoUrl = videoUrl.replace('/video', '/img');
+
+                    // Set the video URL in the modal and show the modal
+                    videoSource.src = true_videoUrl + "#t=" + time;
+                    videoSource.src = videoSource.src.split(".mp4")[0] + ".mp4";
+                    //videoSource.src = videoSource.src
+                    //    .replace("http://127.0.0.1:8510", "https://api.siu.edu.vn/aic/1")
+                    //    .replace("E:/AIC24/pumkin_dataset/", "dataset/AIC2024/original_dataset/");
+                    videoSource.src = videoSource.src + "#t=" + time;
+                    console.log(videoSource.src);
+
+                    modal.style.display = 'block';
+                    modalVideo.load();
+                    modalVideo.pause();
+
+                    modalVideo.addEventListener('loadedmetadata', adjustVideoSize);
+
+
+                    chooseFrameBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        if (modalVideo) {
+                            var selectedVideo = document.getElementById('selectedVideo');
+                            var selectedFrame = document.getElementById('selectedFrame');
+                            var slidingPanel = document.getElementById('sliding-panel');
+                            var currentTime = modalVideo.currentTime;
+                            var choosingFrame = Math.round(currentTime * fps);
+                            var result = `${videoName} ${choosingFrame}`;
+                            navigator.clipboard.writeText(result);
+
+                            var selectedFps = document.getElementById('selectedFps');
+
+                            $('.sliding-panel').trigger('mouseenter');
+                            selectedFps.value = `${fps}`;
+                            selectedVideo.value = `${videoName}`;
+                            selectedFrame.value = `${choosingFrame}`;
+                            document.getElementById('qA').focus();
+                        }
+                    })
+                });
+            });
+
+            function adjustVideoSize() {
+                const aspectRatio = modalVideo.videoWidth / modalVideo.videoHeight;
+            
+                if (aspectRatio < 1) { // Vertical video
+                    modalVideo.style.width = 'auto';
+                    modalVideo.style.height = '90vh';
+                    content.style.transform = 'translate(0, 0)';
+                }
+            }
+            
+
+            // Event listener for each frame name (for image display)
+            document.querySelectorAll('.image_id').forEach(imageLink => {
+                imageLink.addEventListener('click', function (event) {
+                    event.preventDefault(); // Prevent redirect
+
+                    // Hide video and show image elements
+                    modalVideo.style.display = 'none';
+                    modalImage.style.display = 'block';
+
+                    //imgURL = this.href.replace("http://127.0.0.1:8510", "https://api.siu.edu.vn/").replace("keyframes", "img").replace(".avif", ".jpg");
+                    imgURL = this.href.replace("low_res_", "").replace("avif", "jpg").replace("keyframes", "img").replace("http://127.0.0.1:8510", "https://api.siu.edu.vn/aic/1").replace("http://localhost:8510", "https://api.siu.edu.vn/aic/1").replace("E:/AIC24", "/dataset/AIC2024")
+                    console.log(imgURL);
+
+                    // Set the image URL in the modal and show the modal
+                    modalImage.src = imgURL;
+                    console.log(modalImage.src);
+
+                    modal.style.display = 'block';
+
+                    modalImage.onload = adjustImageSize;
+                });
+            });
+
+            function adjustImageSize() {
+                const aspectRatio = modalImage.naturalWidth / modalImage.naturalHeight;
+            
+                if (aspectRatio < 1) { // Vertical image
+                    modalImage.style.width = 'auto';
+                    modalImage.style.height = '90vh';
+                    content.style.transform = 'translate(0, 0)';
+                }
+            }
+
+            // Close modal when clicking on the 'x'
+            closeModal.onclick = function () {
+                modal.style.display = 'none';
+                modalVideo.pause();
+                chooseFrameBtn.style.display = 'none';
+            };
+
+            // Close modal when clicking outside the modal content
+            window.onclick = function (event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                    modalVideo.pause();
+                    chooseFrameBtn.style.display = 'none';
+                }
+            };
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape' || event.key === 'Esc' && modal.style.display == 'block') {
+                    modal.style.display = 'none';
+                    modalVideo.pause();
+                    chooseFrameBtn.style.display = 'none';
+                }
+            });
+        });
+
+        document.getElementById('downloadCsvButton').addEventListener('click', function () {
+            event.preventDefault();
+            // Initialize an array to store CSV data
+            let csvData = [];
+            const qA = document.getElementById('qA').value;
+
+            // Loop through each thumbnail to extract data
+            document.querySelectorAll('.thumbnail').forEach(thumbnail => {
+                // Extract video name
+                let videoElement = thumbnail.querySelector('.video_id');
+                var [videoName, time] = videoElement.text.split(',');
+                videoName = videoName.trim().replace('.mp4', '');
+
+                // Extract frame name
+                let frameElement = thumbnail.querySelector('.image_id');
+                var frameName = frameElement.text.replace('.avif', "");
+                frameName = frameName.trim();
+
+                console.log(videoName, frameName);
+
+                // Add to CSV data array
+                if (qA != '') {
+                    csvData.push(`${videoName}, ${frameName}, ${qA}`);
+                }
+                else {
+                    csvData.push(`${videoName}, ${frameName}`);
+                }
+            });
+
+            // Join the CSV data with newline characters
+            const csvString = csvData.join('\n');
+
+            // Create a Blob with the CSV data
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+
+            // Create a link element
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+
+            var fileName = document.getElementById('fileName');
+            link.download = fileName.value + '.csv' || 'query.csv'; // Name of the file to download
+
+            // Append the link to the document and trigger a click to start the download
+            document.body.appendChild(link);
+            link.click();
+
+            // Remove the link from the document
+            document.body.removeChild(link);
+        });
+
+        // var socket = io();
+
+        // // Event of live message
+        // socket.on('broadcast_message', function (msg) {
+        //     var messagesDiv = document.getElementById('messages');
+        //     var messageElement = document.createElement('p');
+        //     messageElement.innerText = msg;
+        //     messagesDiv.appendChild(messageElement);
+        // });
+
+        // // Send message
+        // document.getElementById('messageForm').onsubmit = function (e) {
+        //     e.preventDefault();
+        //     var message = document.getElementById('messageInput').value;
+        //     socket.emit('send_message', message);
+        //     document.getElementById('messageInput').value = '';
+        // };
+
+        document.getElementById('search-button').addEventListener('click', function () {
+            document.getElementById('query').focus();
+        });
+
+        function updateDropdown(queries) {
+            var dropdown = document.getElementById('query-dropdown');
+            dropdown.innerHTML = ""; // Clear the existing options
+            queries.forEach(function (query) {
+                var option = document.createElement('option');
+                option.value = query;
+                option.textContent = query;
+                dropdown.appendChild(option);
+            });
+        }
+
+        function truncateOptions() {
+            const select = document.getElementById('query-dropdown');
+            const maxLength = 40;  // Total max length of visible characters
+            const headLength = 10;  // Characters to show at the beginning
+            const tailLength = 20;  // Characters to show at the end
+
+            for (let i = 0; i < select.options.length; i++) {
+                let option = select.options[i];
+                let text = option.text;
+
+                // Only truncate if the text is longer than the maximum allowed length
+                if (text.length > maxLength) {
+                    let truncatedText = text.slice(0, headLength) + '...' + text.slice(-tailLength);
+                    option.text = truncatedText;
+                }
+            }
+        }
+
+        function size_update(e) {
+            adjustThumbnailSize();
+            saveValue(e);
+        }
+
+        var k_value = document.getElementById('k');
+        var slider = document.getElementById('slider_k');
+
+        k_value.value = slider.value;
+        slider.oninput = function () {
+            k_value.value = this.value;
+            saveValue(this);
+        }
+
+        // Update slider when text input value changes
+        k_value.oninput = function () {
+            slider.value = this.value;
+            saveValue(slider);
+        }
+
+        window.onload = function () {
+
+            var file = '{{files}}';
+            var regex = /\/[a-zA-Z0-9_\/-]+\.avif/g;
+            var matches = file.match(regex);
+
+            if (matches && matches.length > 0) {
+                console.log(`Found ${matches.length} .avif images.`);
+
+                fetch("/download_zip", {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    method: "POST",
+                    body: JSON.stringify({ files: matches }) // Assuming matches is an array of image paths
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => { throw new Error(err.error); });
+                    }
+                    return response.arrayBuffer(); // Get the arrayBuffer from the response
+                })
+                .then(async (zipData) => {
+                    const zip = new JSZip();
+                    const content = await zip.loadAsync(zipData); // Load the ZIP content
+                    const imageElements = document.querySelectorAll('.lazy-image');
+                    const imageFiles = Object.keys(content.files); // Get all file names from zip
+                    console.log('Files in ZIP:', Object.keys(content.files));
+                
+                    if (imageFiles.length === 0) {
+                        throw new Error("No files found in the zip.");
+                    }
+                    // Process images in parallel using Promise.all for better performance
+                    const imageLoadPromises = Array.from(imageElements).map((img, index) => {
+                        const fileName = imageFiles[index];
+                        if (!fileName) return Promise.resolve(); // Safeguard for index out-of-bounds
+                        return content.files[fileName].async('blob')
+                            .then((fileData) => {
+                                const imageUrl = URL.createObjectURL(fileData); // Create a URL for the blob
+                                img.src = imageUrl; // Set the blob URL as the src of the image
+                                img.setAttribute('data-src', imageUrl);
+                                return imageUrl;
+                            })
+                            .catch(error => {
+                                console.error(`Error processing file: ${fileName}`, error);
+                            });
+                    });
+                    // Wait for all images to load
+                    await Promise.all(imageLoadPromises);
+                    // Optionally, revoke the object URLs after the images are loaded to free up memory
+                    imageElements.forEach(img => {
+                        img.onload = () => {
+                            const imageUrl = img.getAttribute('data-src');
+                            // URL.revokeObjectURL(imageUrl);
+                        };
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            } else {
+                console.error("No image paths found.");
+            }
+            
+
+            const savedValue = getSavedValue("size-slider");
+            if (savedValue) {
+                document.getElementById("size-slider").value = savedValue;
+                adjustThumbnailSize();
+            }
+
+            var savedSliderValue = getSavedValue('slider_k');
+            var savedTextValue = getSavedValue('k');
+
+            if (savedSliderValue) {
+                slider.value = savedSliderValue;
+                k_value.value = savedSliderValue;
+            } else if (savedTextValue) {
+                slider.value = savedTextValue;
+                k_value.value = savedTextValue;
+            }
+
+            loadRadioValue('model');
+            loadRadioValue('rerank');
+            loadRadioValue('s2t_switch');
+            loadRadioValue('translate');
+            loadCheckboxValues('batch');
+
+            var query = "{{query}}";
+            var queries = sessionStorage.getItem('queries');
+
+            // If there's no existing list, initialize an empty array
+            if (!queries) {
+                queries = [];
+            } else {
+                // Parse the existing list into an array
+                queries = JSON.parse(queries);
+            }
+
+            // Add the new query to the list if it's not empty
+            if (query.trim() !== "") {
+                queries.unshift(query);
+
+                // Save the updated list back to session storage
+                sessionStorage.setItem('queries', JSON.stringify(queries));
+
+            }
+
+            document.getElementById('previous-query').textContent = query;
+
+            updateDropdown(queries);
+            truncateOptions();
+        };
+
+        function saveRadioValue(radioGroupName) {
+            const selectedRadio = document.querySelector(`input[name="${radioGroupName}"]:checked`);
+            if (selectedRadio) {
+                localStorage.setItem(radioGroupName, selectedRadio.value);
+            }
+        }
+
+        function loadRadioValue(radioGroupName) {
+            const savedValue = localStorage.getItem(radioGroupName);
+            if (savedValue) {
+                const radioButton = document.querySelector(`input[name="${radioGroupName}"][value="${savedValue}"]`);
+                if (radioButton) {
+                    radioButton.checked = true;
+                }
+            }
+        }
+
+        document.querySelectorAll('input[type="radio"]').forEach((radio) => {
+            radio.addEventListener('change', function () {
+                saveRadioValue(this.name);
+            });
+        });
+
+        function saveCheckboxValues(checkboxGroupName) {
+            const selectedCheckboxes = Array.from(document.querySelectorAll(`input[name="${checkboxGroupName}"]:checked`));
+            console.log(selectedCheckboxes);
+            const values = selectedCheckboxes.map(checkbox => checkbox.value);
+            localStorage.setItem(checkboxGroupName, JSON.stringify(values));
+        }
+
+        function loadCheckboxValues(checkboxGroupName) {
+            const savedValues = JSON.parse(localStorage.getItem(checkboxGroupName));
+            if (savedValues) {
+                savedValues.forEach(value => {
+                    const checkbox = document.querySelector(`input[name="${checkboxGroupName}"][value="${value}"]`);
+                    if (checkbox) {
+                        checkbox.checked = true; // Set the checkboxes as checked based on saved values
+                    }
+                });
+                console.log('Loaded values:', savedValues); // Log the loaded values
+            } else {
+                console.log('No saved values found.'); // Log if no values are found
+            }
+        }
+
+        document.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
+            checkbox.addEventListener('change', function () {
+                saveCheckboxValues(this.name);
+            });
+        });
+
+
+        function adjustThumbnailSize() {
+            const slider = document.getElementById('size-slider');
+            const width = slider.value;
+            const height = (width * 9) / 16;
+
+            document.documentElement.style.setProperty('--thumbnail-width', `${width}px`);
+            document.documentElement.style.setProperty('--thumbnail-height', `${height}px`);
+
+            // Adjust thumbnails width and height
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            thumbnails.forEach(thumbnail => {
+                thumbnail.style.width = `${width}px`;
+                thumbnail.style.height = 'auto';
+            });
+        }
+
+        function resetSlider() {
+            const slider = document.getElementById('slider_k');
+            slider.value = 100; // Reset to initial value
+            adjustThumbnailSize(); // Adjust thumbnail size accordingly
+        }
+
+        //Handle image list
+        var imageList = []
+        var str_imageList = "{{ list_frames|e }}";
+        str_imageList = str_imageList.split(']', Number("{{k}}"));
+        console.log(str_imageList)
+        for (var i = 0; i < str_imageList.length; i++) {
+            var current_imageList = str_imageList[i].replace(new RegExp("&#34;", 'g'), "");
+            current_imageList = current_imageList.replace(new RegExp(" ", 'g'), "");
+            current_imageList = current_imageList.replace(new RegExp("\\[", 'g'), "");
+            var l_f = current_imageList.split(',', 100)
+
+            if (i != 0) {
+                l_f = l_f.slice(1, l_f.length);
+            }
+            imageList.push(l_f)
+        }
+
+        var targetIndices = Array.from(document.querySelectorAll('.thumbnail img')).map(img => parseInt(img.id, 10));
+        console.log(targetIndices);
+
+        //Handle thumbnails
+        document.querySelectorAll('.thumbnail').forEach(function (element, index_fram) {
+            var interval;
+            var framesPerSecond = 2; // frames per second
+            var currentIndex = 10; // starting index
+            var image = element.querySelector("img");
+
+            var previous = element.querySelector(".previous");
+            var after = element.querySelector(".after");
+
+            var currentImageIndex = targetIndices[index_fram];
+            var current_imageList = imageList[currentImageIndex]; // get the current image list
+
+            var videoName = element.querySelector(".video_id");
+            var imageName = element.querySelector(".image_id");
+
+            if (videoName && imageName) {
+                videoName.textContent = videoName.textContent.split('.mp4')[0]; // Use textContent instead of text
+                imageName.textContent = imageName.textContent.split('.')[0]; // Update image name
+            }
+
+
+            //Slide show
+            var playForward = function () {
+                clearInterval(interval);
+                interval = setInterval(function () {
+                    if (currentIndex < current_imageList.length - 1) {
+                        currentIndex++;
+                        image.src = "{{ url_for('download_file', filename='') }}" + current_imageList[currentIndex];
+                    } else {
+                        clearInterval(interval); // stop the interval
+                    }
+                }, 1000 / framesPerSecond);
+            };
+
+            var playBackward = function () {
+                clearInterval(interval);
+                interval = setInterval(function () {
+                    if (currentIndex > 0) {
+                        currentIndex--;
+                        image.src = "{{ url_for('download_file', filename='') }}" + current_imageList[currentIndex];
+                    } else {
+                        clearInterval(interval);
+                    }
+                }, 1000 / framesPerSecond);
+            };
+
+            after.addEventListener('click', playForward);
+            previous.addEventListener('click', playBackward);
+
+            after.addEventListener('mouseleave', function () {
+                clearInterval(interval);
+            });
+
+            previous.addEventListener('mouseleave', function () {
+                clearInterval(interval);
+            });
+
+            element.addEventListener('mouseleave', function () {
+                currentIndex = 10; // reset to the initial
+                if (image.src != image.getAttribute('data-src')) {
+                    image.src = image.getAttribute('data-src');
+                }
+            });
+
+            //show full s2t
+            var hover = element.querySelector(".description-hover");
+            var text = element.querySelector(".description");
+            const s2tValue = localStorage.getItem('s2t_switch');
+            text.textContent = text.textContent.replace(/'/g, '').replace(/,/g, '');
+            hover.addEventListener('mouseenter', function () {
+                if (s2tValue == 'ON') {
+                    text.classList.add('expanded');
+                    hover.style.zIndex = '-1';
+                }
+            });
+
+            text.addEventListener('mouseleave', function () {
+                if (s2tValue == 'ON') {
+                    text.classList.remove('expanded');
+                    hover.style.zIndex = 'auto';
+                }
+            });
+
+            //Getting video id and image id when clicking on the button
+            var checkbox = element.querySelector("input");
+            checkbox.addEventListener('click', function () {
+                var setVideo = document.getElementById("selectedVideo");
+                var input = element.querySelector(".video_id").innerHTML.trim();
+
+                var [videoID, time] = input.split(", ");
+                videoID = videoID.replace(".mp4", "");
+                setVideo.value = videoID;
+
+
+                var setFrame = document.getElementById("selectedFrame");
+                var imageID = element.querySelector(".image_id").innerHTML.trim();
+                imageID = imageID.replace('.avif', '').replace('.jpg', '');
+                setFrame.value = imageID;
+
+                var setFps = document.getElementById('selectedFps');
+                var fps = element.querySelector(".fps").innerHTML.trim();
+                setFps.value = fps;
+                navigator.clipboard.writeText(`${videoID} ${imageID}`);
+
+                document.getElementById('qA').focus();
+            });
+
+            $('#submit').off('click').on('click', function (e) {
+                e.preventDefault();
+                $(this).addClass('active');
+                var button = $(this);
+                const baseUrl = 'submit';
+                const item = $('#selectedVideo').val().trim();
+                const frame = $('#selectedFrame').val().trim();
+                const qA = $('#qA').val().trim() ? $('#qA').val().trim() : '';
+                const fps = $('#selectedFps').val().trim();
+
+                var data = {
+                    fps: fps,
+                    video_name: item,
+                    frame_name: frame,
+                    qa: qA
+                };
+
+                console.log(data)
+
+                $.ajax({
+                    url: baseUrl,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    dataType: 'json',
+                    data: JSON.stringify(data),
+                    success: function (result) {
+                        $('#submitResult').val(JSON.stringify(result));
+                        button.removeClass('active');
+                    },
+                    error: function (error) {
+                        console.log('Error: ' + error.responseText);
+                    }
+                });
+            });
+
+
+            //Get image url
+            var search_image_button = element.querySelector("#search_image");
+            search_image_button.addEventListener("click", function () {
+                var query_input = document.getElementById("query");
+                query_input.value = "{{ url_for('download_file', filename='') }}" + current_imageList[10];
+                document.getElementById("search-button").click();
+            })
+
+            var sort_image_button = element.querySelector("#sort_image");
+            sort_image_button.addEventListener("click", function () {
+                var query_input = document.getElementById("query");
+                query_input.value = "shot-" + "{{ url_for('download_file', filename='') }}" + current_imageList[10];
+                document.getElementById("search-button").click();
+            })
+
+            //Get duplicate
+            var duplicate_button = element.querySelector('#duplicate_button');
+            duplicate_button.addEventListener("click", function() {
+                var query_input = document.getElementById("query");
+                query_input.value = "duplicate-" + "{{ url_for('download_file', filename='') }}" + current_imageList[10];
+                document.getElementById("search-button").click();
+            })
+        });
+
+        //Get the input field
+        // document.getElementById("query").value = getSavedValue("query");    // set the value to this input
+        // document.getElementById("fname").value = getSavedValue("fname");   // set the value to this input
+
+        //Save the value function - save it to localStorage as (ID, VALUE)
+        function saveValue(e) {
+            var id = e.id;  // get the sender's id to save it . 
+            var val = e.value; // get the value. 
+            if (e.type === 'checkbox') {
+                val = e.checked; // true or false
+            } else {
+                val = e.value; // for radio buttons, the selected value
+            }
+            localStorage.setItem(id, val);// Every time user writing something, the localStorage's value will override . 
+        }
+
+        //get the saved value function - return the value of "v" from localStorage. 
+        function getSavedValue(v) {
+            if (!localStorage.getItem(v)) {
+                return "";// You can change this to your defualt value. 
+            }
+            return localStorage.getItem(v);
+        }
+
+        document.getElementById('register').addEventListener('click', function (e) {
+            e.preventDefault();
+            this.classList.add('active');
+            var button = this;
+            var video_Name = document.getElementById('selectedVideo').value;
+            var frame_Name = document.getElementById('selectedFrame').value;
+
+            fetch("register_last_frame",
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    method: "POST",
+                    body: JSON.stringify({ video_name: video_Name, frame_name: frame_Name })
+                })
+                .then(res => res.json())
+                .then(function (data) {
+                    document.getElementById('last-frame').textContent = `(${data.video_name}, ${data.frame_name})`;
+                    console.log('Frame registered:', data);
+                    button.classList.remove('active');
+                })
+                .catch(function (error) {
+                    console.log('Error:', error);
+                });
+        });
+
+        document.getElementById('last-frame').addEventListener('click', function (e) {
+            e.preventDefault();
+            var lastFrameStr = this.textContent.slice(1, -1);
+            console.log(lastFrameStr);
+            var [video, time] = lastFrameStr.split(',');
+            document.getElementById('video_filter').value = video.replace(/'/g, "");
+            document.getElementById('time_in').value = time.replace(/'/g, "");
+        });
+
+        //reset model options and rerank options
+        document.getElementById('reset').addEventListener('click', function () {
+            localStorage.clear();
+        });
+
+        document.getElementById("clearCacheButton").addEventListener("click", function () {
+            localStorage.clear();
+            sessionStorage.clear();
+
+            // Clear cache using Service Worker
+            if ('caches' in window) {
+                caches.keys().then(function (keyList) {
+                    return Promise.all(keyList.map(function (key) {
+                        return caches.delete(key);
+                    }));
+                });
+            }
+
+            // Clear cookies
+            document.cookie.split(";").forEach(function (c) {
+                document.cookie = c.trim().split("=")[0] + "=;expires=" + new Date(0).toUTCString() + ";path=/";
+            });
+
+            window.location.reload(true);
+        });
+
+
+        //get voice btn
+        document.addEventListener("DOMContentLoaded", () => {
+            const voiceBtn = document.getElementById('voiceBtn');
+            const result = document.getElementById('query');
+            const recordedAudio = document.getElementById('recordedAudio');
+        
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+        
+            let isRecording = false;
+            let mediaRecorder;
+            let audioChunks = [];
+            let noSpeechTimeout;
+        
+            // Enable continuous mode and interim results for real-time transcription
+            recognition.continuous = true;
+            recognition.interimResults = true;
+        
+            // Store final transcript
+            let finalTranscript = '';
+        
+            recognition.onstart = () => {
+                console.log('Voice recognition started');
+                voiceBtn.classList.add('active');
+            };
+        
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+        
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript;  // Append final results to the final transcript
+                    } else {
+                        interimTranscript += transcript;  // Collect interim results
+                    }
+                }
+        
+                // Update the textarea with the combined final and interim transcripts
+                result.value = finalTranscript + interimTranscript;
+        
+                // Reset the timeout each time new speech is detected
+                clearTimeout(noSpeechTimeout);
+        
+                // Start a new timeout for 7 seconds after the last speech detection
+                noSpeechTimeout = setTimeout(() => {
+                    console.log('No speech for 7 seconds, stopping recognition');
+                    recognition.stop();
+                    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                        mediaRecorder.stop();
+                    }
+                    voiceBtn.classList.remove('active');
+                    isRecording = false;
+                }, 7000);
+            };
+        
+            recognition.onerror = (event) => {
+                console.error('Recognition error:', event.error);
+            };
+        
+            voiceBtn.addEventListener('click', async (event) => {
+                event.preventDefault();
+        
+                if (isRecording) {
+                    // Stop everything when the button is clicked again
+                    recognition.stop();
+                    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                        mediaRecorder.stop();
+                    }
+                    clearTimeout(noSpeechTimeout);
+                    isRecording = false;
+                    voiceBtn.classList.remove('active');
+                    return;
+                }
+        
+                finalTranscript = ''; // Reset the final transcript when starting a new recording
+                const selectedLanguage = document.querySelector('input[name="language"]:checked')?.value || 'vi-VN';
+                recognition.lang = selectedLanguage;
+                recognition.start();
+        
+                // Start recording audio
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+        
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+        
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    recordedAudio.src = audioUrl;
+                };
+        
+                mediaRecorder.start();
+                isRecording = true;
+            });
+        });        
+        
+        
+
+        //active submission section
+        $(document).ready(function () {
+            $('.sliding-panel').on("mouseenter", function () {
+                $(this).addClass('active');
+            }).on("mouseleave", function () {
+                $(this).removeClass('active');
+            });
+        });
+
+
+        function selectedOutput(clickedCheckbox) {
+            var checkboxes = document.querySelectorAll(".selectedOutput");
+            checkboxes.forEach(function (checkbox) {
+                if (checkbox !== clickedCheckbox) {
+                    checkbox.checked = false;
+                }
+            });
+            var panel = $('#submission');
+            if (clickedCheckbox.checked) {
+                panel.addClass('active');  // expand the panel if checkbox is checked
+            } else {
+                panel.removeClass('active');  // close the panel if the checkbox is unchecked
+            }
+        }
+
+        document.querySelector(".logo").addEventListener('click', function () {
+            document.getElementById("query").value = "hello random pumpkin";
+            document.getElementById("search-button").click();
+        });
+
+        document.addEventListener('keydown', function (event) {
+            // Separate logic for handling Ctrl + 1 -> 6
+            //event.preventDefault();
+            if (event.altKey) {
+                
+                switch (event.key) {
+                    case '1':
+                        var checkbox = document.getElementById('batch_0');
+                        checkbox.checked = !checkbox.checked;
+                        break;
+                    case '2':
+                        var checkbox = document.getElementById('batch_1');
+                        checkbox.checked = !checkbox.checked;
+                        break;
+                    case '3':
+                        var checkbox = document.getElementById('batch_2');
+                        checkbox.checked = !checkbox.checked;
+                        break;
+                    case '4':
+                        var checkbox = document.getElementById('batch_3');
+                        checkbox.checked = !checkbox.checked;
+                        break;
+                    case '5':
+                        var checkbox = document.getElementById('batch_4');
+                        checkbox.checked = !checkbox.checked;
+                        break;
+                    case '6':
+                        var checkbox = document.getElementById('batch_5');
+                        checkbox.checked = !checkbox.checked;
+                        break;
+                    case '0':
+                        var checkbox0 = document.getElementById('batch_0');
+                        var checkbox1 = document.getElementById('batch_1');
+                        var checkbox2 = document.getElementById('batch_2');
+                        var checkbox3 = document.getElementById('batch_3');
+                        var checkbox4 = document.getElementById('batch_4');
+                        var checkbox5 = document.getElementById('batch_5');
+
+                        if (checkbox0.checked==true || checkbox1.checked==true || checkbox2.checked==true || checkbox3.checked==true ||checkbox4.checked==true || checkbox5.checked==true){
+                            checkbox1.checked = false;
+                            checkbox0.checked = false;
+                            checkbox2.checked = false;
+                            checkbox3.checked = false;
+                            checkbox4.checked = false;
+                            checkbox5.checked = false;
+                        }
+                        else {
+                            checkbox1.checked = true;
+                            checkbox0.checked = true;
+                            checkbox2.checked = true;
+                            checkbox3.checked = true;
+                            checkbox4.checked = true;
+                            checkbox5.checked = true;
+                        }
+
+
+                }
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            var activeElement = document.activeElement;
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent default submission
+        
+                // If 'qA' is focused, trigger the submit button
+                if (activeElement.id === 'qA') {
+                    document.getElementById('submit').click();
+                } 
+                // Otherwise, trigger the search button
+                else {
+                    document.getElementById('search-button').click();
+                }
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.ctrlKey && event.key === '`') {
+                event.preventDefault();
+                const translate = document.querySelectorAll('input[name="translate"]');
+                let currentCheckedIndex = Array.from(translate).findIndex(radio => radio.checked);
+
+                // Calculate the next index to toggle between the two radio buttons
+                const nextIndex = (currentCheckedIndex + 1) % translate.length;
+
+                // Uncheck all radio buttons
+                translate.forEach(radio => {
+                    radio.checked = false;
+                });
+
+                // Check the next radio button
+                translate[nextIndex].checked = true;
+                saveRadioValue('translate');
+            }
+        });
+
+
+        document.addEventListener('keydown', function (event) {
+            // Ctrl + Left / Right Arrow: Switch Model
+            if (event.ctrlKey && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+                switchModel(event.key === 'ArrowRight');
+                event.preventDefault();
+            }
+
+            // Shift + Left / Right Arrow: Switch Rerank
+            if (event.shiftKey && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+                switchRerank(event.key === 'ArrowRight');
+                event.preventDefault();
+            }
+
+            // Shift + Enter: Reset the form
+            if (event.shiftKey && event.key === 'Enter') {
+                document.getElementById("reset").click();
+                event.preventDefault();
+            }
+        });
+        
+
+        document.addEventListener('keydown', function (event) {
+            const modal = document.getElementById('videoModal');
+            const video = document.getElementById('modalVideo');
+            if (event.code === 'Space' && modal.style.display === 'block') {
+                event.preventDefault();
+                if (video.paused) {
+                    video.play();
+                } else {
+                    video.pause();
+                }
+            }
+        });
+
+        function switchModel(isNext) {
+            const models = document.querySelectorAll('input[name="model"]');
+            let selectedIndex = Array.from(models).findIndex(radio => radio.checked);
+            if (isNext) {
+                selectedIndex = (selectedIndex + 1) % models.length;
+            } else {
+                selectedIndex = (selectedIndex - 1 + models.length) % models.length;
+            }
+            models[selectedIndex].checked = true;
+            saveRadioValue('model');
+        }
+
+        function switchRerank(isNext) {
+            const reranks = document.querySelectorAll('input[name="rerank"]');
+            let selectedIndex = Array.from(reranks).findIndex(radio => radio.checked);
+            if (isNext) {
+                selectedIndex = (selectedIndex + 1) % reranks.length;
+            } else {
+                selectedIndex = (selectedIndex - 1 + reranks.length) % reranks.length;
+            }
+            reranks[selectedIndex].checked = true;
+            saveRadioValue('rerank');
+        }
+    </script>
+</body>
+
+</html>

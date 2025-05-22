@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Search Page</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            flex-direction: column;
+            background-color: #ebedf3;
+        }
+
+        .header {
+            background-color: #333;
+            text-align: center;
+            padding: 10px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .main-content input[type="text"] {
+            width: 100%;
+            max-width: 300px;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .main-content button, audio {
+            padding: 10px 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #003b6d;
+            color: white;
+            cursor: pointer;
+            margin: 10px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .main-content .audio-input {
+            margin-left: 10px;
+        }
+
+        .main-content {
+            display: flex;
+            flex: 1;
+            padding: 20px;
+            box-sizing: border-box;
+            flex-direction: column;
+            height: calc(100vh - 50px);
+            overflow: hidden;
+        }
+
+        .filters {
+            width: 100%;
+            max-width: 300px;
+            padding: 10px;
+            background-color: #676767;
+            border-right: 1px solid #ddd;
+            box-sizing: border-box;
+            color: white;
+        }
+
+        .filters input[type="range"] {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .main-content input[type="text"] {
+            padding: 10px 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            color: #000;
+            margin: 10px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .filters .translate-options,
+        .filters .model-options {
+            margin-top: 20px;
+        }
+
+        .videos {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(var(--thumbnail-size, 150px), 1fr));
+            grid-auto-rows: var(--thumbnail-size, 150px);
+            gap: 15px;
+            padding: 10px;
+            background-color: #676767;
+            box-sizing: border-box;
+            overflow: auto;
+            color: white;
+        }
+
+        .video-thumbnail {
+            box-sizing: border-box;
+            transition: transform 0.3s ease;
+        }
+
+        .video-thumbnail img {
+            width: 100%;
+            height: 100%;
+            border-radius: 5px;
+            object-fit: contain;
+        }
+
+        .video-thumbnail p {
+            text-align: center;
+            margin: 5px 0 0;
+        }
+
+        .submission-section {
+            position: fixed;
+            right: -350px;
+            width: 300px;
+            height: auto;
+            line-height: 46px;
+            font-size: 14px;
+            background: #ebedf3;
+            text-align: left;
+            color: #333;
+            top: 40%;
+            transform: translateY(-50%);
+            box-shadow: -4px 0px 5px #00000036;
+            color: #333;
+            z-index: 9999;
+            padding: 20px 30px 30px 30px;
+            -webkit-transition: all 0.4s ease;
+            -moz-transition: all 0.4s ease;
+            transition: all 0.4s ease;
+        }
+
+        .submission-section.active {
+            right: 0;
+        }
+
+        .submission-section .button .btn {
+            width: 100%;
+            text-align: center;
+            margin-top: 8px;
+            display: inline-block;
+            float: left;
+            font-size: 13px;
+            width: 100%;
+            text-transform: capitalize;
+        }
+
+        .submission-section input {
+            color: #333;
+            margin: 0;
+            padding: 0;
+            line-height: 22px;
+            margin-bottom: 10px;
+        }
+
+        .submission {
+            position: absolute;
+            left: -80px;
+            width: 80px;
+            height: 45px;
+            line-height: 45px;
+            font-size: 14px;
+            border-radius: 5px 0 0 5px;
+            background: #003b6d;
+            text-align: center;
+            color: #fff;
+            top: 0;
+            cursor: pointer;
+            box-shadow: -4px 0px 5px #00000036;
+        }
+
+        @media (min-width: 768px) {
+            .main-content {
+                flex-direction: row;
+            }
+
+            .filters {
+                width: 20%;
+            }
+
+            .videos {
+                width: 80%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+    </div>
+    <div class="main-content">
+        <div class="filters">
+            <button id="search-button">Search</button>
+            <input type="text" id="search-bar" placeholder="Search for videos...">
+            <audio id="recordedAudio" controls style="background-color: white;"></audio>
+            <button id="voiceBtn">Start Voice Input</button>
+            <div class="translate-options">
+                <p>Languages</p>
+                <label>
+                    <input type="radio" name="language" value="vi-VN" checked>
+                    Vietnamese
+                </label>
+                <label>
+                    <input type="radio" name="language" value="en-US">
+                    English
+                </label>
+            </div>
+            <div class="model-options">
+                <p>Models</p>
+                <label>
+                    <input type="radio" name="models" value="model1">
+                    Model 1
+                </label>
+                <label>
+                    <input type="radio" name="models" value="model2">
+                    Model 2
+                </label>
+                <label>
+                    <input type="radio" name="models" value="model3">
+                    Model 3
+                </label>
+            </div>
+
+            <h2>Thumbnail Size</h2>
+            <input type="range" id="size-slider" min="50" max="200" value="100" oninput="adjustThumbnailSize()">
+        </div>
+
+        <ul class="submission-section">
+            <a class="submission" href="#">Submission</a>
+            <form action="/submit" method="POST">
+                <label>
+                    API Key:
+                    <input type="text" placeholder="API key..." name="apiKey">
+                </label>
+
+                <label>
+                    Video:
+                    <input type="text" placeholder="Video..." name="video">
+                </label>
+
+                <label>
+                    Frame:
+                    <input type="text" placeholder="Frame..." name="frame">
+                </label>
+
+                <label>
+                    Result:
+                    <input type="text" placeholder="Result..." name="result">
+                </label>
+                <button id="submit">Submit</button>
+            </form>
+        </ul>
+
+        <div class="videos" id="videos">
+
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function adjustThumbnailSize() {
+            const slider = document.getElementById('size-slider');
+            const size = slider.value;
+            document.documentElement.style.setProperty('--thumbnail-size', `${size}px`);
+        }
+
+        // example thumbnails array
+        const videoData = [
+            { src: './L01_V001/0001.jpg', title: 'Video Title' },
+            { src: './L01_V001/0002.jpg', title: 'Video Title' },
+            { src: './L01_V001/0002.jpg', title: 'Video Title' },
+            { src: './L01_V001/0003.jpg', title: 'Video Title' },
+            { src: './L01_V001/0004.jpg', title: 'Video Title' },
+            { src: './L01_V001/0005.jpg', title: 'Video Title' },
+            { src: './L01_V001/0006.jpg', title: 'Video Title' },
+            { src: './L01_V001/0007.jpg', title: 'Video Title' },
+            { src: './L01_V001/0008.jpg', title: 'Video Title' },
+            { src: './L01_V001/0009.jpg', title: 'Video Title' },
+            { src: './L01_V001/0010.jpg', title: 'Video Title' },
+            { src: './L01_V001/0011.jpg', title: 'Video Title' },
+            { src: './L01_V001/0012.jpg', title: 'Video Title' },
+            { src: './L01_V001/0013.jpg', title: 'Video Title' },
+            { src: './L01_V001/0014.jpg', title: 'Video Title' },
+            { src: './L01_V001/0015.jpg', title: 'Video Title' },
+            { src: './L01_V001/0016.jpg', title: 'Video Title' },
+            { src: './L01_V001/0017.jpg', title: 'Video Title' },
+            { src: './L01_V001/0018.jpg', title: 'Video Title' },
+            { src: './L01_V001/0019.jpg', title: 'Video Title' },
+            { src: './L01_V001/0020.jpg', title: 'Video Title' },
+        ];
+
+        // load thumbnails
+        function loadThumbnails() {
+            const videosContainer = document.getElementById('videos');
+
+            videoData.forEach(video => {
+                const videoThumbnail = document.createElement('div');
+                videoThumbnail.classList.add('video-thumbnail');
+
+                const img = document.createElement('img');
+                img.src = video.src;
+
+                const p = document.createElement('p');
+                p.textContent = video.title;
+
+                videoThumbnail.appendChild(img);
+                videoThumbnail.appendChild(p);
+
+                videosContainer.appendChild(videoThumbnail);
+            });
+        }
+        window.onload = loadThumbnails;
+
+        //get voice btn
+        document.addEventListener("DOMContentLoaded", () => {
+            const voiceBtn = document.getElementById('voiceBtn');
+            const result = document.getElementById('search-bar');
+            const recordedAudio = document.getElementById('recordedAudio');
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+
+            let isRecording = false;
+            let mediaRecorder;
+            let audioChunks = [];
+
+            recognition.onstart = () => {
+                console.log('Voice recognition started. Try speaking into the microphone.');
+            };
+
+            recognition.onspeechend = () => {
+                console.log('Voice recognition ended.');
+                recognition.stop();
+                if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                    mediaRecorder.stop();
+                }
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                result.value = transcript;
+            };
+
+            voiceBtn.addEventListener('click', async () => {
+                if (isRecording) {
+                    recognition.stop();
+                    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                        mediaRecorder.stop();
+                    }
+                    isRecording = false;
+                    voiceBtn.innerText = 'Start Voice Recognition';
+                    return;
+                }
+
+                const selectedLanguage = document.querySelector('input[name="language"]:checked')?.value || 'en-US';
+                recognition.lang = selectedLanguage;
+                recognition.start();
+
+                // record audio
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    recordedAudio.src = audioUrl;
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+                voiceBtn.innerText = 'Stop Voice Recognition';
+            });
+        });
+
+        //active submission section
+        $(document).ready(function () {
+            $('.submission-section .submission').on("click", function () {
+                $('.submission-section').toggleClass('active');
+            });
+        });
+
+    </script>
+</body>
+
+</html>

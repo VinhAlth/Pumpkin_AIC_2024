@@ -1,0 +1,1039 @@
+<!doctype html>
+<html>
+
+<head>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="https://kit.fontawesome.com/a54d2cbf95.js"></script>
+	<style>
+		.photo {
+		transform: scale(1);
+		transition: transform .5s;
+		position: relative;
+		}
+
+		.photo:hover {
+		transform: scale(1.5);
+		}
+
+		.insider {
+		z-index: -1;
+		position: relative;
+		}
+
+		#submit {
+		width: 400px;
+		height: 50px;
+		}
+
+		.insider:hover {
+		position: relative;
+		z-index: 99 !important;
+		}
+
+		.program {
+		flex-basis: calc(100% / 4);
+		margin: 0px;
+		}
+
+		.thumbnail {
+		border: none;
+		width: 250px;
+		height: auto;
+		top: -50px;
+		left: -35px;
+		/* display: block; */
+		/* z-index: 99999999; */
+		cursor: pointer;
+		-webkit-transition-property: all;
+		-webkit-transition-duration: 0.3s;
+		-webkit-transition-timing-function: ease;
+		margin: center;
+		object-fit:scale-down;
+		}
+
+		/*change the number below to scale to the appropriate size*/
+		
+		.thumbnail:hover {
+		transform: scale(1.5);
+		z-index: 99999999;
+		
+		}
+
+		.add-padding {
+		padding: 8px;
+		}
+		.w-full {
+		width: 100%;
+		}
+
+		.margin {
+			margin: 0 10px;
+		}
+
+		.flex-container {
+		display: flex;
+		flex-wrap: wrap;
+		width: 100%;
+		gap: 5px;
+		}
+
+		.search-section {
+		width: 100%;
+		max-width: 100%;
+		max-height: 100%;
+		}
+		  
+		@media (max-width: 768px) {
+			.search-section {
+			padding: 20px;
+			font-size: 14px;
+			}
+		}
+		  
+		  @media (min-width: 768px) and (max-width: 1200px) {
+			.search-section {
+			padding: 30px;
+			font-size: 16px;
+			}
+		}
+		  
+		  @media (min-width: 1200px) {
+			.search-section {
+			padding: 40px;
+			font-size: 18px;
+			}
+		}
+
+
+		.grid-container > div {
+		text-align: center;
+		/* padding: 20px 0; */
+		font-size: 20px;
+		}
+		input{
+		color: #000000;
+		}
+		/* CSS */
+		.button-68 {
+		appearance: none;
+		backface-visibility: hidden;
+		background-color: #27ae60;
+		border-radius: 8px;
+		border-style: none;
+		box-shadow: rgba(39, 174, 96, .15) 0 4px 9px;
+		box-sizing: border-box;
+		color: #fff;
+		cursor: pointer;
+		display: inline-block;
+		font-family: Inter,-apple-system,system-ui,"Segoe UI",Helvetica,Arial,sans-serif;
+		font-size: 16px;
+		font-weight: 600;
+		letter-spacing: normal;
+		line-height: 1.5;
+		outline: none;
+		overflow: hidden;
+		padding: 13px 20px;
+		position: relative;
+		text-align: center;
+		text-decoration: none;
+		transform: translate3d(0, 0, 0);
+		transition: all .3s;
+		user-select: none;
+		-webkit-user-select: none;
+		touch-action: manipulation;
+		vertical-align: top;
+		white-space: nowrap;
+		}
+
+		.button-68:hover {
+		background-color: #3C486B;
+		opacity: 1;
+		transform: translateY(0);
+		transition-duration: .35s;
+		}
+
+		.button-68:active {
+		transform: translateY(2px);
+		transition-duration: .35s;
+		}
+
+		.button-68:hover {
+		box-shadow: rgba(39, 174, 96, .2) 0 6px 12px;
+		}
+
+		body {
+		background: black;
+		min-height: 100vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #fff;
+		font-family: 'Work Sans', sans-serif;
+		font-weight: 900;
+		}
+
+		.topdiv {
+			flex-basis: calc(100% / 3);
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			text-align: center;
+			}
+			  
+		.bottomdiv {
+			flex-basis: calc(100% / 2);
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			text-align: center;
+			}
+
+		.header{
+			color: #00fdcf; 
+			line-height: 1; 
+			margin-left: 5px;
+			font-size: large; 
+			text-transform: uppercase; 
+			text-align: left;
+		}
+		
+		.p-image-section{
+			line-height: 0.3;
+			margin-left: 7%;
+			margin-bottom: 3%;
+			font-size: 1vw;
+		}
+
+		label{
+			color: #ffffff;
+		}
+
+		.text-overlay-top {
+            position: absolute;
+            top: 0%;
+            color: #003366;
+			opacity: 75%;
+            font-size: 20px;
+            text-align: center;
+        }
+
+		.text-overlay-bottom {
+            /* position: absolute; */
+            position: absolute;
+            top: 110px;
+            color: #003366;
+			opacity: 75%;
+            font-size: 20px;
+            text-align: center;
+        }
+
+		.to-top {
+		background: white;
+		position: fixed;
+		bottom: 16px;
+		right:32px;
+		width:50px;
+		height:50px;
+		margin-bottom: 300px;
+		margin-left: 5px;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size:32px;
+		color:#1f1f1f;
+		text-decoration: none;
+		opacity:0;
+		pointer-events: none;
+		transition: all .4s;
+		  }
+		  
+		.to-top.active {
+		bottom:32px;
+		pointer-events: auto;
+		opacity:1;
+		}
+		
+		p {
+		font-size: 3vw;
+		text-transform: uppercase;
+		text-align: left;
+		line-height: 2;
+		}
+
+		.description{
+		font-size: 9pt; 
+		text-transform: none;
+		color: rgb(255,255,255 , 0.4);
+		font-weight: normal;
+		text-align: left;
+		margin: 0;
+		padding: 0;
+		word-wrap: break-word;
+		display: -webkit-box;
+		-webkit-line-clamp: 1;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		}
+
+		::placeholder {
+			color: white;
+			opacity: 0.7;
+			font-weight: normal;
+		}
+
+		#query::placeholder {
+			font-weight: 800;
+		}
+
+		#popup {
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			width: 400px;
+			transform: translate(-50%, -50%);
+			background-color: #fff;
+			padding: 20px;
+			z-index: 9999;
+		  }
+		
+		  #popup .chosen {
+			background-color: cyan;
+		  }
+		
+		  .rectangle {
+			width: 200px;
+			height: 100px;
+			background-color: gray;
+			border: solid black;
+			cursor: pointer;
+		  }
+		
+		#menu {
+		  margin-top: 10px;
+		}
+		
+		#menu input[type="checkbox"] {
+		  margin-right: 10px;
+		}
+
+		.textbox {
+			background-color: #282424;
+			border: 3px solid rgb(255,255,255, 0.4);
+			color: rgb(255,255,255,1);
+		}
+
+		.half {
+            position: absolute;
+            width: 50%;
+            height: 140px;
+            opacity: 0.5;
+        }
+
+		.slide {
+			background-color: #000000;
+		}
+
+		.fancy {
+			@supports (background-clip: text) or (-webkit-background-clip: text) {
+			background-image: url("data:image/svg+xml,%3Csvg width='2250' height='900' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg%3E%3Cpath fill='%233C486B' d='M0 0h2255v899H0z'/%3E%3Ccircle cx='366' cy='207' r='366' fill='%233C5B80'/%3E%3Ccircle cx='1777.5' cy='318.5' r='477.5' fill='%233C64A0'/%3E%3Ccircle cx='1215' cy='737' r='366' fill='%233C4975'/%3E%3C/g%3E%3C/svg%3E%0A");
+			background-size: 110% auto;
+			background-position: left;
+			color: transparent;
+			-webkit-background-clip: text;
+			background-clip: text;
+			}
+		  }
+	</style>
+</head>
+
+<body>
+	<div style="width: 100%; height: 100%; background-size:auto;">
+		<div id="popup" style="display: none; flex-direction:column; justify-content: center; width: 1200px; height: 500px; background-color: black;">
+  
+			<div style="display: flex;">
+				<div style="display: flex; justtify-content: center; flex-direction: column;">
+					<table style="left: 0;">
+					  <tr>
+						<td>
+						  <div class="rectangle" id="cell1" data-value="left top">
+						  </div>
+						</td>
+						<td>
+						  <div class="rectangle" id="cell2" data-value="center top">
+						  </div>
+						</td>
+						<td>
+						  <div class="rectangle" id="cell3" data-value="right top">
+						  </div>
+						</td>
+					  </tr>
+					  <tr>
+						<td>
+						  <div class="rectangle" id="cell4" data-value="left mid">
+						  </div>
+						</td>
+						<td>
+						  <div class="rectangle" id="cell5" data-value="center mid">
+						  </div>
+						</td>
+						<td>
+						  <div class="rectangle" id="cell6" data-value="right mid">
+						  </div>
+						</td>
+					  </tr>
+					  <tr>
+						<td>
+						  <div class="rectangle" id="cell7" data-value="left bottom">
+						  </div>
+						</td>
+						<td>
+						  <div class="rectangle" id="cell8" data-value="center bottom">
+						  </div>
+						</td>
+						<td>
+						  <div class="rectangle" id="cell9" data-value="right bottom">
+						  </div>
+						</td>
+					  </tr>
+					</table>
+					<br>
+					<input class="add-padding margin textbox" type="text" placeholder="Object and position..." id="input_object">
+				</div>
+				<div id="menu" style="display: flex; flex-direction: column; align-items: center; justify-content: space-between;">
+				  <div style="margin-left: 10px;">
+					<label for=" airplane "><input type="checkbox" id=" airplane ">airplane </label>
+					<label for=" apple "><input type="checkbox" id=" apple ">apple </label>
+					<label for=" backpack "><input type="checkbox" id=" backpack ">backpack </label>
+					<label for=" banana "><input type="checkbox" id=" banana ">banana </label>
+					<label for=" baseball bat "><input type="checkbox" id=" baseball bat ">baseball bat </label>
+					<label for=" baseball glove "><input type="checkbox" id=" baseball glove ">baseball glove </label>
+					<label for=" bear "><input type="checkbox" id=" bear ">bear </label>
+					<label for=" bed "><input type="checkbox" id=" bed ">bed </label>
+					<label for=" bench "><input type="checkbox" id=" bench ">bench </label>
+					<label for=" bicycle "><input type="checkbox" id=" bicycle ">bicycle </label>
+					<label for=" bird "><input type="checkbox" id=" bird ">bird </label>
+					<label for=" boat "><input type="checkbox" id=" boat ">boat </label>
+					<label for=" book "><input type="checkbox" id=" book ">book </label>
+					<label for=" bottle "><input type="checkbox" id=" bottle ">bottle </label>
+					<label for=" bowl "><input type="checkbox" id=" bowl ">bowl </label>
+					<label for=" broccoli "><input type="checkbox" id=" broccoli ">broccoli </label>
+					<label for=" bus "><input type="checkbox" id=" bus ">bus </label>
+					<label for=" cake "><input type="checkbox" id=" cake ">cake </label>
+					<label for=" car "><input type="checkbox" id=" car ">car </label>
+					<label for=" carrot "><input type="checkbox" id=" carrot ">carrot </label>
+					<label for=" cat "><input type="checkbox" id=" cat ">cat </label>
+					<label for=" cell phone "><input type="checkbox" id=" cell phone ">cell phone </label>
+					<label for=" chair "><input type="checkbox" id=" chair ">chair </label>
+					<label for=" clock "><input type="checkbox" id=" clock ">clock </label>
+					<label for=" couch "><input type="checkbox" id=" couch ">couch </label>
+					<label for=" cow "><input type="checkbox" id=" cow ">cow </label>
+					<label for=" cup "><input type="checkbox" id=" cup ">cup </label>
+					<label for=" dining table "><input type="checkbox" id=" dining table ">dining table </label>
+					<label for=" dog "><input type="checkbox" id=" dog ">dog </label>
+					<label for=" donut "><input type="checkbox" id=" donut ">donut </label>
+					<label for=" elephant "><input type="checkbox" id=" elephant ">elephant </label>
+					<label for=" fire hydrant "><input type="checkbox" id=" fire hydrant ">fire hydrant </label>
+					<label for=" fork "><input type="checkbox" id=" fork ">fork </label>
+					<label for=" frisbee "><input type="checkbox" id=" frisbee ">frisbee </label>
+					<label for=" giraffe "><input type="checkbox" id=" giraffe ">giraffe </label>
+					<label for=" hair drier "><input type="checkbox" id=" hair drier ">hair drier </label>
+					<label for=" handbag "><input type="checkbox" id=" handbag ">handbag </label>
+					<label for=" horse "><input type="checkbox" id=" horse ">horse </label>
+					<label for=" hot dog "><input type="checkbox" id=" hot dog ">hot dog </label>
+					<label for=" keyboard "><input type="checkbox" id=" keyboard ">keyboard </label>
+					<label for=" kite "><input type="checkbox" id=" kite ">kite </label>
+					<label for=" knife "><input type="checkbox" id=" knife ">knife </label>
+					<label for=" laptop "><input type="checkbox" id=" laptop ">laptop </label>
+					<label for=" microwave "><input type="checkbox" id=" microwave ">microwave </label>
+					<label for=" motorcycle "><input type="checkbox" id=" motorcycle ">motorcycle </label>
+					<label for=" mouse "><input type="checkbox" id=" mouse ">mouse </label>
+					<label for=" orange "><input type="checkbox" id=" orange ">orange </label>
+					<label for=" oven "><input type="checkbox" id=" oven ">oven </label>
+					<label for=" parking meter "><input type="checkbox" id=" parking meter ">parking meter </label>
+					<label for=" person "><input type="checkbox" id=" person ">person </label>
+					<label for=" pizza "><input type="checkbox" id=" pizza ">pizza </label>
+					<label for=" potted plant "><input type="checkbox" id=" potted plant ">potted plant </label>
+					<label for=" refrigerator "><input type="checkbox" id=" refrigerator ">refrigerator </label>
+					<label for=" remote "><input type="checkbox" id=" remote ">remote </label>
+					<label for=" sandwich "><input type="checkbox" id=" sandwich ">sandwich </label>
+					<label for=" scissors "><input type="checkbox" id=" scissors ">scissors </label>
+					<label for=" sheep "><input type="checkbox" id=" sheep ">sheep </label>
+					<label for=" sink "><input type="checkbox" id=" sink ">sink </label>
+					<label for=" skateboard "><input type="checkbox" id=" skateboard ">skateboard </label>
+					<label for=" skis "><input type="checkbox" id=" skis ">skis </label>
+					<label for=" snowboard "><input type="checkbox" id=" snowboard ">snowboard </label>
+					<label for=" spoon "><input type="checkbox" id=" spoon ">spoon </label>
+					<label for=" sports ball "><input type="checkbox" id=" sports ball ">sports ball </label>
+					<label for=" stop sign "><input type="checkbox" id=" stop sign ">stop sign </label>
+					<label for=" suitcase "><input type="checkbox" id=" suitcase ">suitcase </label>
+					<label for=" surfboard "><input type="checkbox" id=" surfboard ">surfboard </label>
+					<label for=" teddy bear "><input type="checkbox" id=" teddy bear ">teddy bear </label>
+					<label for=" tennis racket "><input type="checkbox" id=" tennis racket ">tennis racket </label>
+					<label for=" tie "><input type="checkbox" id=" tie ">tie </label>
+					<label for=" toaster "><input type="checkbox" id=" toaster ">toaster </label>
+					<label for=" toilet "><input type="checkbox" id=" toilet ">toilet </label>
+					<label for=" toothbrush "><input type="checkbox" id=" toothbrush ">toothbrush </label>
+					<label for=" traffic light "><input type="checkbox" id=" traffic light ">traffic light </label>
+					<label for=" train "><input type="checkbox" id=" train ">train </label>
+					<label for=" truck "><input type="checkbox" id=" truck ">truck </label>
+					<label for=" tv "><input type="checkbox" id=" tv ">tv </label>
+					<label for=" umbrella "><input type="checkbox" id=" umbrella ">umbrella </label>
+					<label for=" vase "><input type="checkbox" id=" vase ">vase </label>
+					<label for=" wine glass "><input type="checkbox" id=" wine glass ">wine glass </label>
+					<label for=" zebra "><input type="checkbox" id=" zebra ">zebra </label>
+				  </div>
+				</div>
+			</div>
+			<div style="margin-top: 20px; justify-content: space-between; align-items: center; transform: translate(45%);">
+				<button id="saveButton" class="button-68" style="margin: 0 10px;">Save</button>
+				<button id="closeButton" class="button-68" style="margin: 0 10px;">Close</button>
+			</div>
+		</div>
+
+		<section class="search-section">
+			<div>
+			   <div style="display: flex; justify-content: center; padding: 0px; margin: 0px;">
+		
+				   	<form method="POST" style="display: flex; flex-direction: column; gap: 1rem; justify-content: space-between; padding-inline: 5rem; width: 70vw; ">
+						<div>
+							<label class="header" style="margin-left: 20px;" for="myCheckbox">TRANSLATE:</label>
+							<label for="yes" style="color: #fff;"><input type="radio" id="yes" name="translate" value="true">Yes</label>
+							<label for="no" style="color: #fff;"><input type="radio" id="no" name="translate" value="false" checked>No</label>
+							
+							<label class="header" style="margin-left: 20px;">MODEL: </label>
+							<label for="a_blip2_coco"><input type="radio" id="a_blip2_coco" name="model" value="8503" checked>B_Coco</label>
+							{% if model == "8505": %}
+							<label for="a_clip14"><input type="radio" id="a_clip14" name="model" value="8505" checked>C14</label>
+							{% else %}
+							<label for="a_clip14"><input type="radio" id="a_clip14" name="model" value="8505">C14</label>
+							{% endif %}
+							{% if model == "8521": %}
+							<label style="margin-right: 10px;" for="temporal_BF"><input type="radio" id="temporal_BF" name="model" value="8521" checked>Temporal_BF</label>
+							{% else %}
+							<label style="margin-right: 10px;" for="temporal_BF"><input type="radio" id="temporal_BF" name="model" value="8521">Temporal_BF</label>
+							{% endif %}
+
+							<!-- {% if model == "8520": %}
+							<label style="margin-right: 10px; for="temporal"><input type="radio" id="temporal" name="model" value="8520" checked>Temporal</label>
+							{% else %}
+							<label style="margin-right: 10px; for="temporal"><input type="radio" id="temporal" name="model" value="8520">Temporal</label>
+							{% endif %} -->
+							|||||
+							<input style="display: inline-block; margin-left: 10px; width: 35%;" type="range" min="1" max="1000" value="300" name="slider_k" id="slider_k" onchange="slider_update(this)">
+							<input class="textbox" style="display: inline-block; margin-left: 10px; width: 3cm; color: white; opacity: 0.7;" value="180" type="text" name="k" id="k">
+							
+							<div style="display: flex;">
+								<div style="width: 75%; display: block;">
+									<div style="display: flex;">
+										<input onkeyup='saveValue(this);' name="query" id="query" class="add-padding w-full margin textbox" type="text" placeholder="Enter your textual queries..." style="size : 100px;" autofocus/>
+									</div>
+									<br>
+									<div style="display: flex;">
+										<!-- <div class="margin" style="width: 30%;">
+											<input onkeyup='saveValue(this);'  name="s2t" id="s2t" class="input add-padding w-full" type="text" placeholder="Enter speech in an video..." style="border: 3px solid rgb(80, 80, 117)"></input>
+										</div> -->
+										<div class="margin" style=" width: 50%;">
+											<input onkeyup='saveValue(this);'  name="fname" id="fname" class="add-padding w-full textbox" type="text" placeholder="Paste image URL..." style="size: 100px;"></input>
+										</div>
+										<div class="margin" style=" width: 50%; margin-left: 0px;">
+											<input onkeyup='saveValue(this);'  name="object" id="object" class="add-padding w-full textbox" type="text" placeholder="Enter object traits, e.g person 2 cat 2, etc..." style="size: 100px;"></input>
+										</div>
+
+										<div class="margin" style=" width: 10%; margin-left: 0px;">
+											<button type="button" id="openButton" class="add-padding w-full" style="background-color: rgb(255,255,255, 0.4); color: rgb(255,255,255, 0.7); font-weight: normal;">Object</button>
+										</div>
+									</div>
+									<br>
+									<p class="header" style="margin-left: 20px; width: 50%; display: none;">VIDEO FILTERING: </p>
+									<div style="display: flex;">
+										<input id="video_name" class="add-padding w-full margin textbox" style="color: #000000; flex: 1;" type="text" placeholder="Video name for filtering...." id="video_filter" name="video_filter">
+										<input id="timeIn_video_name" class="add-padding w-full margin textbox" style="color: #000000; flex: 1;" type="text" placeholder="Time in..." id="time_in" name="time_in">
+										<input id="timeOut_video_name" class="add-padding w-full margin textbox" style="color: #000000; flex: 1;" type="text" placeholder="Time out..." id="time_out" name="time_out">
+									</div>
+									<br>
+									<div style="display: flex;">
+										<input class="add-padding w-full margin textbox" id="submitFullResult" type="text" style="size: 100px;" placeholder="Full result...">
+									</div>
+							<br>
+								</div>
+								<div style="width: 25%; display: block">
+									<div style="display: flex;">
+										<input class="add-padding w-full margin textbox" id="selectedKey" type="text" style="size: 100px;" placeholder="API Key...">
+									</div>
+									<br>
+									<div style="display: flex;">
+										<input class="add-padding w-full margin textbox" id="selectedVideo" type="text" style="size: 100px;" placeholder="Video...">
+									</div>
+									<br>
+									<div style="display: flex;">
+										<input class="add-padding w-full margin textbox" id="selectedFrame" type="text" style="size: 100px;" placeholder="Frame...">
+									</div>
+									<br>
+									<div style="display: flex;">
+										<input class="add-padding w-full margin textbox" id="submitResult" type="text" style="size: 100px;" placeholder="Result...">
+									</div>
+								</div>
+							</div>
+							<label class="header" style="margin-left: 20px; display: none;">HISTORY:</label>
+
+							<div style="display: flex; justify-content: space-between; align-items: center; display: none;">
+
+								<select style="color: #757575; flex: 1;" class="add-padding margin" placeholder="Combobox 1" id="history_1" name="history_1">
+									<option value="---select---">---select---</option>
+									{%for h in his %}
+										<option value="{{h}}">{{h}}</option>
+									{% endfor %}
+								</select>
+
+								{% if logic == "and": %}
+								<label for="and" style="color: #757575;"><input type="radio" id="and" name="logic" value="and" checked> AND </label>
+								{% else %}
+								<label for="and" style="color: #757575;"><input type="radio" id="and" name="logic" value="and"> AND </label>
+								{% endif %}
+
+								{% if logic == "ofc": %}
+								<label for="ofc" style="color: #757575;"><input type="radio" id="ofc" name="logic" value="ofc" checked> Remove OFC </label>
+								{% else %}
+								<label for="ofc" style="color: #757575;"><input type="radio" id="ofc" name="logic" value="ofc"> Remove OFC </label>
+								{% endif %}
+
+								<select style="color: #757575; flex: 1;" class="add-padding margin" placeholder="Combobox 2" id="history_2" name="history_2">
+								<option value="---select---">---select---</option>
+								{%for h in his %}
+									<option value="{{h}}">{{h}}</option>
+								{% endfor %}
+								</select>
+
+								  
+								
+								<input class="add-padding margin" style="color: #000000; flex: 1;" type="text" placeholder="ID for history" id="history_name" name="history_name">
+								
+							</div>
+							<br>
+		
+							<!-- <p class="header" style="margin-left: 20px; width: 50%;">Range slider:</p> -->
+							
+							<div style="display: flex; align-items: center; justify-content: center;">
+
+								<button class="button-68" type="submit" id="search" style="width:115px; top: 10px; margin-left: 10px; margin-right: 10px; display:inline-block;"> Search </button>
+								<button onkeypress=""  class="button-68" type="reset" id="reset" style="width:115px; top: 10px; margin-left: 10px; margin-right: 10px; display: inline-block;"> Reset </button>
+								<button onclick="submit_f()" class="button-68" type="button" id="submit" style="width:115px; top: 10px; margin-left: 10px; margin-right: 10px; display:inline-block;"> Submit </button>
+								
+							</div>
+							<div id="output"></div>
+						</div>
+						
+				   	</form>
+				   	
+			   </div>
+			</div>
+		</section>
+
+		<section id="image_section">
+			<p class="header" style="font-size: small; margin-left: 100px;">QUERY: {{ query }}</p>
+			{% if query_path %}
+			<img src="{{ query_path }}" width="300px">
+			{% endif %}
+			<p class="header" style="font-size: small; margin-left: 100px;">RESULTS: {{count}}</p>
+			<br><br>
+			{% for index, f, f_name, id, video, s2t in files %}
+				<div class="slide" style="margin-left:90px;">
+					<div class="thumbnail" style="float: left; margin-right: 20px; margin-bottom: 20px; background-color: #282424; position: relative; display: inline-block;" height="200px">
+						<div id="previous" class="half" style="left: 0;"></div>
+						<div id="after" class="half" style="right: 0;"></div>
+						<!-- <a style="font-size: small; margin-left: 10px;" class="video_id text-overlay-top" href="{{ url_for('video', filename=video, keyframe=f) }}" target="{{index}}">{{id}}</a> -->
+						<a style="font-size: small; margin-left: 10px;" class="video_id text-overlay-top" href="/aic/1/{{ url_for('video', filename=video, keyframe=f) }}" target="{{index}}">{{id}}</a>
+						<input onclick="selectedOutput(this)" class="selectedOutput text-overlay-top" style="position: absolute; right:35%; top:20%; width: 35%; height: 35%; opacity: 20%;" type="checkbox">
+						<!--<img  src="{{ url_for('download_file', filename=f) }}" height="200px" id="{{index}}"> -->
+						<img  src="/aic/1/{{ url_for('download_file', filename=f) }}" height="200px" id="{{index}}"
+						<a style="font-size: small; margin-left: 10px;" class="image_id text-overlay-bottom" onclick="" href="{{ url_for('keyframes', keyframe=f)}}" target="{{index}}">{{f_name}}</a>
+						<!-- <p class="description">{{obj}}</p>
+						<p class="description">{{date}}</p>
+						<p class="description">{{program}}</p> -->
+						<button class="button-68 text-overlay-bottom" style="left: 80%; opacity: 50%; background-color: #3C486B;" id="search_image" data-imageid="{{index}}"></button>
+						<p id="speech" class="description">{{s2t}}</p>
+					</div>
+				</div>
+			{% endfor %}
+		</section>
+
+		<a href="#" class="to-top">
+			<i class="fas fa-chevron-up"></i>
+		</a>		
+	</div>
+
+
+	<script>
+		//Pop up
+		document.getElementById("openButton").addEventListener("click", function() {
+			var popup = document.getElementById("popup");
+			popup.style.display = "block";
+			var selectedPosition;
+			var selectedCheckbox;
+			var selectedItems = [];
+			var rectangles = document.getElementsByClassName("rectangle");
+			for (var i = 0; i < rectangles.length; i++) { //select subrectangle
+			  rectangles[i].addEventListener("click", function() {
+			  selectedPosition = this.getAttribute("data-value");
+			  for (var j = 0; j < rectangles.length; j++) {
+				rectangles[j].classList.remove("chosen");
+			  }
+			  this.classList.add("chosen");
+			  });
+			}
+			
+			var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+	
+			checkboxes.forEach(function(checkbox) {//select checkbox
+			  checkbox.addEventListener("click", function() {
+				if (this.checked) {
+				  selectedCheckbox = this.parentNode.textContent;
+				  checkboxes.forEach(function(otherCheckbox) {
+					if (otherCheckbox !== checkbox) {
+					  otherCheckbox.checked = false;
+					}
+				  });
+				}
+			  });
+			});
+
+			//Save object and position
+			var save = document.getElementById("saveButton");
+			save.addEventListener('click', function() {
+			  if (selectedCheckbox) {
+				if (selectedPosition) {
+				  var selectedItem = selectedCheckbox.trim() + " " + selectedPosition.trim();
+				  selectedItems.push(selectedItem.trim());
+				}
+			  }
+			  var input_object = document.getElementById("input_object");
+			  input_object.value = selectedItems.join(", ");
+			})
+		  });
+
+		  //Close object popup
+		  document.getElementById("closeButton").addEventListener("click", function() {
+			var popup = document.getElementById("popup");
+			var object_value = document.getElementById("input_object").value;
+			document.getElementById("object").value = object_value;
+			popup.style.display = "none";
+		  });
+
+		//Auto scroll to image section
+		function scrollToSection() {
+			setTimeout(function() {
+				var section = document.getElementById("image_section");
+				section.scrollIntoView({ behavior: "smooth" });
+			}, 100);
+		}
+
+		if("{{scroll}}" == "True")
+		{
+			var search_btn = document.getElementById('search');
+			search_btn.addEventListener('click',scrollToSection());
+		}
+
+			
+
+		var imageList = []
+		var str_imageList = "{{ list_frames|e }}";
+		str_imageList = str_imageList.split(']', Number("{{k}}"));
+		console.log(str_imageList)
+		for (var i = 0; i < str_imageList.length; i++) 
+		{
+			var current_imageList = str_imageList[i].replace(new RegExp("&#34;", 'g'), "");
+			current_imageList = current_imageList.replace(new RegExp(" ", 'g'), "");
+			current_imageList = current_imageList.replace(new RegExp("\\[", 'g'), "");
+			var l_f = current_imageList.split(',', 100)
+
+			if( i != 0 ){
+				l_f = l_f.slice(1, l_f.length);
+			}
+			imageList.push(l_f)
+		}
+
+
+
+        var divs = document.querySelectorAll('.thumbnail');
+
+		var index_fram = 0;
+
+        // Event
+    	divs.forEach(function(element) {
+ 
+			var interval;
+			var framesPerSecond = 2; // Số frame trong 1 giây
+    		var currentIndex = 20;
+			var image = element.querySelector("img");
+			var source = image.src;
+			var previous = element.querySelector("#previous");
+			var after = element.querySelector("#after");
+
+			var current_imageList = [];
+			current_imageList = imageList[index_fram];
+			
+	
+        	var playForward = function() {
+				interval = setInterval(function() {
+					
+					currentIndex = (currentIndex + 1);
+					console.log(currentIndex);
+					if (currentIndex > current_imageList.length - 1) {
+						currentIndex--;
+						clearInterval(interval);
+					}
+		
+					image.src = "{{ url_for('download_file', filename='') }}" + current_imageList[currentIndex];
+				}, 1000 / framesPerSecond);
+			};
+		
+			var playBackward = function() {
+				interval = setInterval(function() {
+					
+					currentIndex = (currentIndex - 1);
+					console.log(currentIndex);
+					if (currentIndex < 0) {
+						currentIndex++;
+						clearInterval(interval);
+					}
+		
+					image.src = "{{ url_for('download_file', filename='') }}" + current_imageList[currentIndex];
+					
+				}, 1000 / framesPerSecond);
+			};
+		
+			after.addEventListener('mouseenter', function() {
+				playForward();
+			});
+		
+			previous.addEventListener('mouseenter', function() {
+				playBackward();
+			});
+
+			after.addEventListener('mouseleave', function() {
+				clearInterval(interval);
+			});
+		
+			previous.addEventListener('mouseleave', function() {
+				clearInterval(interval);
+			});
+		
+			element.addEventListener('mouseleave', function() {
+				currentIndex = 20;
+				image.src = source;
+			});
+
+			index_fram = (index_fram + 1);
+
+
+			//Show full text
+			var text = element.querySelector("#speech");
+			text.addEventListener('click', function() { // Expand text when clicking on it
+        		text.style.webkitLineClamp = 'unset';
+        	});
+
+			text.addEventListener('mouseout', function() {
+        		text.style.webkitLineClamp = 1;
+        	});
+
+			function scrollToTop() {
+            	window.scrollTo(0, 0); // Scroll to the top of the page
+        	}
+
+			//Getting video id and image id when clicking on the button
+			var button = element.querySelector("input");
+			button.addEventListener('click', function() { 
+				var setVideo = document.getElementById("selectedVideo");
+				var input = element.querySelector(".video_id").innerHTML;
+				var [videoID,time] = input.split(", ");
+				setVideo.value = videoID.replace(".mp4", "");
+
+				var setFrame = document.getElementById("selectedFrame");
+				var imageID = element.querySelector(".image_id").innerHTML;
+				imageID = imageID.replace('.jpg', "");
+				setFrame.value = imageID;
+				scrollToTop();
+				submit_f();
+			});
+
+    	});
+
+
+		//Scroll to top
+		const toTop = document.querySelector(".to-top");
+		window.addEventListener("scroll", () => {
+  		if (window.pageYOffset > 100) {
+    		toTop.classList.add("active");
+  		} else {
+    		toTop.classList.remove("active");
+  		}
+		});
+		// Get the input field
+
+
+		document.getElementById("query").value = getSavedValue("query");    // set the value to this input
+        document.getElementById("fname").value = getSavedValue("fname");   // set the value to this input
+		document.getElementById("object").value = getSavedValue("object");   // set the value to this input
+		
+
+
+
+
+
+		var k_value = document.getElementById('k');
+		var slider = document.getElementById('slider_k');
+
+		k_value.innerHTML = slider.value;
+		slider.oninput = function(){
+			k_value.innerHTML = this.value;
+		}
+
+
+        /* Here you can add more inputs to set value. if it's saved */
+		function slider_update(e) {
+  			document.getElementById('k').value = e.value;
+		}
+
+        //Save the value function - save it to localStorage as (ID, VALUE)
+        function saveValue(e){
+            var id = e.id;  // get the sender's id to save it . 
+            var val = e.value; // get the value. 
+            localStorage.setItem(id, val);// Every time user writing something, the localStorage's value will override . 
+        }
+
+        //get the saved value function - return the value of "v" from localStorage. 
+        function getSavedValue  (v){
+            if (!localStorage.getItem(v)) {
+                return "";// You can change this to your defualt value. 
+            }
+            return localStorage.getItem(v);
+        }
+		
+
+		function selectedOutput(clickedCheckbox){
+			var checkboxes = document.querySelectorAll(".selectedOutput");
+			checkboxes.forEach(function(checkbox) {
+				if (checkbox !== clickedCheckbox) {
+				  checkbox.checked = false;
+				}
+			});
+		}
+		
+        // var buttonElements = document.getElementById("search_image"); 
+        var buttonElements = document.querySelectorAll("#search_image"); 
+
+		buttonElements.forEach(function(button) {
+            button.addEventListener("click", function() {
+                // Get the image ID associated with the button
+				document.getElementById("reset").click(); 
+                var imageId = button.getAttribute("data-imageid");
+                var f_name_input = document.getElementById('fname')
+				f_name_input.value = document.getElementById(imageId).src.split('/img/')[1]
+				document.getElementById('a_blip2_coco').checked = true;
+				saveValue(f_name_input)
+				document.getElementById("search").click();
+            });
+        });
+
+		function submit_f(){
+			const baseUrl = 'https://eventretrieval.one/api/v1/submit';
+        	const item = document.getElementById('selectedVideo').value;
+        	const frame = document.getElementById('selectedFrame').value;
+			var token = document.getElementById('selectedKey').value;
+			if( token == '') {
+				token = 'node0toz4452k0adz78ldz6l7ntsn2960';
+			}
+
+			const url = baseUrl+'?item='+item+'&frame='+frame+'&session='+token;
+
+			fetch(url, {
+				method: 'GET'
+			})
+			.then(response => {
+				if (!response.ok) {
+					throw new Error(`HTTP error! Status: ${response.status}`);
+				}
+				return response.json();
+			})
+			.then(data => {
+				console.log(data); // Handle the response data here
+				var submitResult = document.getElementById('submitResult'); 
+				var submitFullResult = document.getElementById('submitFullResult'); 
+
+				submitResult.value = JSON.parse(JSON.stringify(data)).submission;
+				submitFullResult.value = JSON.stringify(data);
+
+			})
+			.catch(error => {
+				console.error('Fetch error:', error);
+			});
+		}
+		document.getElementById('reset').addEventListener('click', function() {
+			localStorage.clear(); 
+		});
+		
+		// Add a keydown event listener to the document
+		document.addEventListener("keydown", function(event) {
+			// Get the key that was pressed
+			if ((event.ctrlKey) && (event.key == "r" || event.key == "R")) {
+                event.preventDefault();
+                document.getElementById("reset").click();
+            }
+		});
+
+		document.addEventListener("keydown", function(event) {
+			// Get the key that was pressed
+			if ((event.ctrlKey) && (event.key == "a" || event.key == "A")){
+                event.preventDefault();
+                document.getElementById("reset").click();
+                document.getElementById("search").click();
+
+            }
+		});
+
+		document.addEventListener("keydown", function(event) {
+			// Get the key that was pressed
+			if (event.key == "Alt") {
+                event.preventDefault();
+				if(document.getElementById("yes").checked){
+					document.getElementById("no").checked = true; 
+				}else{
+					document.getElementById("yes").checked = true;
+				}
+            }
+		});
+
+		document.addEventListener("keydown", function(event) {
+			// Get the key that was pressed
+			if ((event.ctrlKey) && (event.key == "d" || event.key == "D")){
+                event.preventDefault();
+				if(document.getElementById("a_blip2_coco").checked){
+					document.getElementById("a_clip14").checked = true; 
+				}else{
+					if(document.getElementById("a_clip14").checked){
+						document.getElementById("temporal_BF").checked = true;
+					}else{
+						document.getElementById("a_blip2_coco").checked = true; 
+					}
+				}
+            }
+		});
+		function backToTop() {
+			window.scrollTo(0, 0); // Scroll to the top of the page
+        }
+
+		document.addEventListener("keydown", function(event) {
+			// Get the key that was pressed
+			if (event.key == "Escape"){
+                event.preventDefault();
+                backToTop();
+            }
+		});
+
+
+	</script>
+</body>
+
+</html>

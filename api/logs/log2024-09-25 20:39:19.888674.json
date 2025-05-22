@@ -1,0 +1,19 @@
+{
+    "Current Query": 18,
+    "Round Start Time": 1727271440.2406464,
+    "Wrong This Round": {
+        "pumpkin": 2,
+        "kitty": 1,
+        "champion": 0
+    },
+    "Score Teams": {
+        "pumpkin": 205,
+        "kitty": 327,
+        "champion": 284
+    },
+    "Submitted": {
+        "pumpkin": true,
+        "kitty": true,
+        "champion": true
+    }
+}
