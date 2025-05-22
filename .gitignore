@@ -1,0 +1,51 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependency directories
+node_modules/
+bower_components/
+vendor/
+
+# Environment variables
+.env
+.env.*
+
+# Build output
+dist/
+build/
+tmp/
+temp/
+out/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE settings
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS generated files
+*.swp
+*.bak
+*.tmp
+
+# Coverage reports
+coverage/
+*.lcov
+
+# Compiled files
+*.class
+*.pyc
+*.o
+*.out
+*.exe
+
+# Git directory ignore overrides
+!.gitignore
