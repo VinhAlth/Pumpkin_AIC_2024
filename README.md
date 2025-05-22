@@ -1,7 +1,5 @@
 # PumpkinV2: Optimized & Interactive Video Event Retrieval System
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](#license)
-
 An end-to-end, highly scalable video event retrieval platform with improved temporal algorithms, a production-grade UI, and optimized back-end. Developed by the Saigon International University team for the AI Challenge HCMC 2024.
 
 ---
