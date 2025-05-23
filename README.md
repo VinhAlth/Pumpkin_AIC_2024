@@ -36,8 +36,6 @@ An end-to-end, highly scalable video event retrieval platform with improved temp
 - **RESTful API**: powered by a production-grade Gunicorn WSGI server  
 
 ---
----
-
 <p align="center">
   <img src="system.gif" alt="System Architecture" width="700"/>
 </p>
