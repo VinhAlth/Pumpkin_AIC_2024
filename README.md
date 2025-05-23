@@ -38,6 +38,8 @@ An end-to-end, highly scalable video event retrieval platform with improved temp
 ---
 <p align="center">
   <img src="system.gif" alt="System Architecture" width="700"/>
+    <br/>
+  <em>▲ The system integrates advanced AI components, optimized for multi-dimensional video retrieval and user interaction.</em>
 </p>
 
 ---
