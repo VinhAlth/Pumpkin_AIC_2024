@@ -39,7 +39,7 @@ An end-to-end, highly scalable video event retrieval platform with improved temp
 ---
 
 <p align="center">
-  <img src="assets/system.gif" alt="System Architecture" width="700"/>
+  <img src="system.gif" alt="System Architecture" width="700"/>
 </p>
 
 ---
